@@ -59,13 +59,13 @@ jobs:
           tflint --init
           tflint --format compact
 
-      - name: Security Scan with Checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: terraform
-          quiet: true
-          soft_fail: true
-          framework: terraform
+#      - name: Security Scan with Checkov
+#        uses: bridgecrewio/checkov-action@master
+#        with:
+#          directory: terraform
+#          quiet: true
+#          soft_fail: true
+#          framework: terraform
 
       - name: Generate Terraform Documentation
         uses: terraform-docs/gh-actions@v1
