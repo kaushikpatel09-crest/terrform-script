@@ -9,7 +9,7 @@ terraform {
 
 # Application Load Balancer
 resource "aws_lb" "main" {
-  name_prefix        = substr(replace(var.load_balancer_name, "-", ""), 0, 6)
+  name               = var.load_balancer_name
   internal           = var.internal
   load_balancer_type = "application"
   security_groups    = var.security_group_ids
@@ -24,8 +24,8 @@ resource "aws_lb" "main" {
 
 # Target Group
 resource "aws_lb_target_group" "main" {
-  name_prefix = substr(replace(var.target_group_name, "-", ""), 0, 6)
-  port        = var.target_group_port
+  name     = var.target_group_name
+  port     = var.target_group_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = var.target_type
