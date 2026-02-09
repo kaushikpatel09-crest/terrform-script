@@ -154,7 +154,7 @@ resource "aws_appautoscaling_policy" "ecs_policy_memory" {
 
 # IAM Role for ECS Task Execution
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name_prefix = "${var.project_name}-ecs-task-execution-"
+  name = "${var.project_name}-ecs-task-execution-${var.service_name}-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -168,7 +168,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   })
 
   tags = {
-    Name = "${var.project_name}-ecs-task-execution-role"
+    Name = "${var.project_name}-ecs-task-execution-${var.service_name}-${var.environment}"
   }
 }
 
@@ -180,7 +180,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 
 # IAM Role for ECS Task
 resource "aws_iam_role" "ecs_task_role" {
-  name_prefix = "${var.project_name}-ecs-task-role-"
+  name = "${var.project_name}-ecs-task-role-${var.service_name}-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -194,7 +194,7 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 
   tags = {
-    Name = "${var.project_name}-ecs-task-role"
+    Name = "${var.project_name}-ecs-task-role-${var.service_name}-${var.environment}"
   }
 }
 
