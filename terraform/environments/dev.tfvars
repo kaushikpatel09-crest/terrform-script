@@ -30,7 +30,7 @@ documentdb_engine_version        = "4.0.0"
 documentdb_master_username       = "masteruser"
 documentdb_backup_retention_days = 7
 documentdb_num_instances         = 1
-documentdb_instance_class        = "db.t3.small"
+documentdb_instance_class        = "db.t3.medium"
 documentdb_skip_final_snapshot   = true
 
 # Load Balancer Configuration
