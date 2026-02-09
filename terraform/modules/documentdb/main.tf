@@ -32,7 +32,7 @@ resource "aws_docdb_cluster" "main" {
   storage_encrypted               = true
   skip_final_snapshot             = var.skip_final_snapshot
   final_snapshot_identifier       = var.skip_final_snapshot ? null : "${var.cluster_identifier}-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
-  enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
+  enabled_cloudwatch_logs_exports = ["audit", "profiler"]
   engine_version                  = var.engine_version
 
   tags = {
