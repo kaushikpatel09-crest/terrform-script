@@ -1,0 +1,76 @@
+name: Terraform Validation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/**'
+
+jobs:
+  validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    
+    env:
+      TERRAFORM_VERSION: 1.5.0
+      AWS_REGION: us-east-1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Format Check
+        id: fmt
+        working-directory: ./terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init (Dry Run)
+        working-directory: ./terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        id: validate
+        working-directory: ./terraform
+        run: terraform validate
+
+      - name: TFLint
+        uses: terraform-linters/setup-tflint@v3
+        with:
+          tflint_version: latest
+
+      - name: Run TFLint
+        working-directory: ./terraform
+        run: |
+          tflint --init
+          tflint --format compact
+
+      - name: Security Scan with Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform
+          quiet: true
+          soft_fail: true
+          framework: terraform
+
+      - name: Generate Terraform Documentation
+        uses: terraform-docs/gh-actions@v1
+        with:
+          working_dir: terraform
+          output_file: README.md
+          output_method: inject
+          git_push: false
