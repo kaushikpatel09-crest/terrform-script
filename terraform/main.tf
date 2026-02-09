@@ -128,7 +128,7 @@ module "external_alb" {
   internal           = false
 
   vpc_id             = module.vpc.vpc_id
-  subnet_ids         = [module.vpc.public_subnet_id]
+  subnet_ids         = module.vpc.public_subnet_ids
   security_group_ids = [module.vpc.alb_public_security_group_id]
 
   target_group_name = "${var.project_name}-external-tg-${var.environment}"
