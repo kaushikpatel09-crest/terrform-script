@@ -44,7 +44,7 @@ module "ecs_frontend" {
   environment    = var.environment
   project_name   = var.project_name
   cluster_name   = "${var.project_name}-fe-${var.environment}"
-  service_name   = "${var.project_name}-fe-service"
+  service_name   = "${var.project_name}-fe-service-${var.environment}"
   container_name = "frontend"
   container_port = 3000
   task_cpu       = var.frontend_task_cpu
@@ -73,7 +73,7 @@ module "ecs_backend" {
   environment    = var.environment
   project_name   = var.project_name
   cluster_name   = "${var.project_name}-be-${var.environment}"
-  service_name   = "${var.project_name}-be-service"
+  service_name   = "${var.project_name}-be-service-${var.environment}"
   container_name = "backend"
   container_port = 8080
   task_cpu       = var.backend_task_cpu
