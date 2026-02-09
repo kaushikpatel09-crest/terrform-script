@@ -9,9 +9,8 @@ terraform {
 
 # DocumentDB Subnet Group
 resource "aws_docdb_subnet_group" "main" {
-  name_prefix     = "${var.project_name}-"
-  subnet_ids      = var.subnet_ids
-  skip_destroying = true
+  name_prefix = "${var.project_name}-"
+  subnet_ids  = var.subnet_ids
 
   tags = {
     Name = "${var.project_name}-docdb-subnet-group-${var.environment}"
