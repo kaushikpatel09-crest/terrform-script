@@ -120,7 +120,7 @@ resource "aws_route_table_association" "private" {
 
 # Security Group for ALB (Public)
 resource "aws_security_group" "alb_public" {
-  name_prefix = "${var.project_name}-alb-public-"
+  name        = "${var.project_name}-alb-public-sg-${var.environment}"
   description = "Security group for public ALB"
   vpc_id      = aws_vpc.main.id
 
@@ -152,7 +152,7 @@ resource "aws_security_group" "alb_public" {
 
 # Security Group for ALB (Internal)
 resource "aws_security_group" "alb_internal" {
-  name_prefix = "${var.project_name}-alb-internal-"
+  name        = "${var.project_name}-alb-internal-sg-${var.environment}"
   description = "Security group for internal ALB"
   vpc_id      = aws_vpc.main.id
 
@@ -184,7 +184,7 @@ resource "aws_security_group" "alb_internal" {
 
 # Security Group for ECS
 resource "aws_security_group" "ecs" {
-  name_prefix = "${var.project_name}-ecs-"
+  name        = "${var.project_name}-ecs-sg-${var.environment}"
   description = "Security group for ECS tasks"
   vpc_id      = aws_vpc.main.id
 
@@ -216,7 +216,7 @@ resource "aws_security_group" "ecs" {
 
 # Security Group for DocumentDB
 resource "aws_security_group" "documentdb" {
-  name_prefix = "${var.project_name}-documentdb-"
+  name        = "${var.project_name}-documentdb-sg-${var.environment}"
   description = "Security group for DocumentDB"
   vpc_id      = aws_vpc.main.id
 
