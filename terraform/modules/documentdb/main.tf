@@ -62,7 +62,7 @@ resource "aws_docdb_cluster_instance" "main" {
   count              = var.num_instances
   cluster_identifier = aws_docdb_cluster.main.id
   instance_class     = var.instance_class
-  engine              = "docdb"
+  engine             = "docdb"
 
   tags = {
     Name = "${var.project_name}-docdb-instance-${count.index + 1}-${var.environment}"

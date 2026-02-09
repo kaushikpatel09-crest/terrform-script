@@ -38,7 +38,7 @@ variable "public_subnet_cidrs" {
 variable "private_subnet_cidrs" {
   type        = list(string)
   description = "Private subnet CIDR blocks (3 subnets required)"
-  
+
   validation {
     condition     = length(var.private_subnet_cidrs) == 3
     error_message = "Must provide exactly 3 private subnet CIDR blocks."

@@ -29,38 +29,38 @@ provider "aws" {
 module "vpc" {
   source = "./modules/vpc"
 
-  environment            = var.environment
-  project_name           = var.project_name
-  vpc_cidr               = var.vpc_cidr
-  availability_zones     = var.availability_zones
-  public_subnet_cidrs    = var.public_subnet_cidrs
-  private_subnet_cidrs   = var.private_subnet_cidrs
+  environment          = var.environment
+  project_name         = var.project_name
+  vpc_cidr             = var.vpc_cidr
+  availability_zones   = var.availability_zones
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
 }
 
 # ECS Frontend Module
 module "ecs_frontend" {
   source = "./modules/ecs"
 
-  environment           = var.environment
-  project_name          = var.project_name
-  cluster_name          = "${var.project_name}-fe-${var.environment}"
-  service_name          = "${var.project_name}-fe-service"
-  container_name        = "frontend"
-  container_port        = 3000
-  task_cpu              = var.frontend_task_cpu
-  task_memory           = var.frontend_task_memory
-  desired_count         = var.frontend_desired_count
-  min_capacity          = var.frontend_min_capacity
-  max_capacity          = var.frontend_max_capacity
-  
-  vpc_id                = module.vpc.vpc_id
-  subnet_ids            = [module.vpc.private_subnet_ids[0]]
-  security_group_ids    = [module.vpc.ecs_security_group_id]
-  
-  container_image       = var.frontend_image
-  container_image_tag   = var.frontend_image_tag
-  log_group_name        = "/ecs/${var.project_name}-fe-${var.environment}"
-  
+  environment    = var.environment
+  project_name   = var.project_name
+  cluster_name   = "${var.project_name}-fe-${var.environment}"
+  service_name   = "${var.project_name}-fe-service"
+  container_name = "frontend"
+  container_port = 3000
+  task_cpu       = var.frontend_task_cpu
+  task_memory    = var.frontend_task_memory
+  desired_count  = var.frontend_desired_count
+  min_capacity   = var.frontend_min_capacity
+  max_capacity   = var.frontend_max_capacity
+
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = [module.vpc.private_subnet_ids[0]]
+  security_group_ids = [module.vpc.ecs_security_group_id]
+
+  container_image     = var.frontend_image
+  container_image_tag = var.frontend_image_tag
+  log_group_name      = "/ecs/${var.project_name}-fe-${var.environment}"
+
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
   depends_on = [module.vpc, module.internal_alb]
@@ -70,26 +70,26 @@ module "ecs_frontend" {
 module "ecs_backend" {
   source = "./modules/ecs"
 
-  environment           = var.environment
-  project_name          = var.project_name
-  cluster_name          = "${var.project_name}-be-${var.environment}"
-  service_name          = "${var.project_name}-be-service"
-  container_name        = "backend"
-  container_port        = 8080
-  task_cpu              = var.backend_task_cpu
-  task_memory           = var.backend_task_memory
-  desired_count         = var.backend_desired_count
-  min_capacity          = var.backend_min_capacity
-  max_capacity          = var.backend_max_capacity
-  
-  vpc_id                = module.vpc.vpc_id
-  subnet_ids            = [module.vpc.private_subnet_ids[1]]
-  security_group_ids    = [module.vpc.ecs_security_group_id]
-  
-  container_image       = var.backend_image
-  container_image_tag   = var.backend_image_tag
-  log_group_name        = "/ecs/${var.project_name}-be-${var.environment}"
-  
+  environment    = var.environment
+  project_name   = var.project_name
+  cluster_name   = "${var.project_name}-be-${var.environment}"
+  service_name   = "${var.project_name}-be-service"
+  container_name = "backend"
+  container_port = 8080
+  task_cpu       = var.backend_task_cpu
+  task_memory    = var.backend_task_memory
+  desired_count  = var.backend_desired_count
+  min_capacity   = var.backend_min_capacity
+  max_capacity   = var.backend_max_capacity
+
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = [module.vpc.private_subnet_ids[1]]
+  security_group_ids = [module.vpc.ecs_security_group_id]
+
+  container_image     = var.backend_image
+  container_image_tag = var.backend_image_tag
+  log_group_name      = "/ecs/${var.project_name}-be-${var.environment}"
+
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
   depends_on = [module.vpc, module.internal_alb]
@@ -99,21 +99,21 @@ module "ecs_backend" {
 module "documentdb" {
   source = "./modules/documentdb"
 
-  environment            = var.environment
-  project_name           = var.project_name
-  cluster_identifier     = "${var.project_name}-docdb-${var.environment}"
-  engine_version         = var.documentdb_engine_version
-  master_username        = var.documentdb_master_username
-  master_password        = var.documentdb_master_password
-  backup_retention_days  = var.documentdb_backup_retention_days
-  num_instances          = var.documentdb_num_instances
-  instance_class         = var.documentdb_instance_class
-  
-  vpc_id                 = module.vpc.vpc_id
-  subnet_ids             = [module.vpc.private_subnet_ids[2]]
-  security_group_ids     = [module.vpc.documentdb_security_group_id]
-  
-  skip_final_snapshot    = var.documentdb_skip_final_snapshot
+  environment           = var.environment
+  project_name          = var.project_name
+  cluster_identifier    = "${var.project_name}-docdb-${var.environment}"
+  engine_version        = var.documentdb_engine_version
+  master_username       = var.documentdb_master_username
+  master_password       = var.documentdb_master_password
+  backup_retention_days = var.documentdb_backup_retention_days
+  num_instances         = var.documentdb_num_instances
+  instance_class        = var.documentdb_instance_class
+
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = [module.vpc.private_subnet_ids[2]]
+  security_group_ids = [module.vpc.documentdb_security_group_id]
+
+  skip_final_snapshot = var.documentdb_skip_final_snapshot
 
   depends_on = [module.vpc]
 }
@@ -122,22 +122,22 @@ module "documentdb" {
 module "external_alb" {
   source = "./modules/load_balancer"
 
-  environment          = var.environment
-  project_name         = var.project_name
-  load_balancer_name   = "${var.project_name}-external-alb-${var.environment}"
-  internal             = false
-  
-  vpc_id               = module.vpc.vpc_id
-  subnet_ids           = [module.vpc.public_subnet_id]
-  security_group_ids   = [module.vpc.alb_public_security_group_id]
-  
-  target_group_name    = "${var.project_name}-external-tg-${var.environment}"
-  target_group_port    = 80
-  target_type          = "ip"
-  health_check_path    = "/"
-  
-  enable_https         = var.enable_https
-  certificate_arn      = var.certificate_arn
+  environment        = var.environment
+  project_name       = var.project_name
+  load_balancer_name = "${var.project_name}-external-alb-${var.environment}"
+  internal           = false
+
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = [module.vpc.public_subnet_id]
+  security_group_ids = [module.vpc.alb_public_security_group_id]
+
+  target_group_name = "${var.project_name}-external-tg-${var.environment}"
+  target_group_port = 80
+  target_type       = "ip"
+  health_check_path = "/"
+
+  enable_https    = var.enable_https
+  certificate_arn = var.certificate_arn
 
   depends_on = [module.vpc]
 }
@@ -146,21 +146,21 @@ module "external_alb" {
 module "internal_alb" {
   source = "./modules/load_balancer"
 
-  environment          = var.environment
-  project_name         = var.project_name
-  load_balancer_name   = "${var.project_name}-internal-alb-${var.environment}"
-  internal             = true
-  
-  vpc_id               = module.vpc.vpc_id
-  subnet_ids           = module.vpc.private_subnet_ids
-  security_group_ids   = [module.vpc.alb_internal_security_group_id]
-  
-  target_group_name    = "${var.project_name}-internal-tg-${var.environment}"
-  target_group_port    = 80
-  target_type          = "ip"
-  health_check_path    = "/"
-  
-  enable_https         = false
+  environment        = var.environment
+  project_name       = var.project_name
+  load_balancer_name = "${var.project_name}-internal-alb-${var.environment}"
+  internal           = true
+
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.vpc.private_subnet_ids
+  security_group_ids = [module.vpc.alb_internal_security_group_id]
+
+  target_group_name = "${var.project_name}-internal-tg-${var.environment}"
+  target_group_port = 80
+  target_type       = "ip"
+  health_check_path = "/"
+
+  enable_https = false
 
   depends_on = [module.vpc]
 }
