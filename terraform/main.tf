@@ -55,7 +55,7 @@ module "ecs_frontend" {
 
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = [module.vpc.private_subnet_ids[0]]
-  security_group_ids = [module.vpc.ecs_security_group_id]
+  security_group_ids = [module.vpc.ecs_frontend_security_group_id]
 
   container_image     = var.frontend_image
   container_image_tag = var.frontend_image_tag
@@ -84,7 +84,7 @@ module "ecs_backend" {
 
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = [module.vpc.private_subnet_ids[1]]
-  security_group_ids = [module.vpc.ecs_security_group_id]
+  security_group_ids = [module.vpc.ecs_backend_security_group_id]
 
   container_image     = var.backend_image
   container_image_tag = var.backend_image_tag

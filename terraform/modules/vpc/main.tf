@@ -160,14 +160,7 @@ resource "aws_security_group" "alb_internal" {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb_public.id]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    security_groups = [aws_security_group.ecs_frontend.id]
   }
 
   egress {
@@ -182,24 +175,24 @@ resource "aws_security_group" "alb_internal" {
   }
 }
 
-# Security Group for ECS
-resource "aws_security_group" "ecs" {
-  name        = "${var.project_name}-ecs-sg-${var.environment}"
-  description = "Security group for ECS tasks"
+# Security Group for ECS Frontend
+resource "aws_security_group" "ecs_frontend" {
+  name        = "${var.project_name}-ecs-fe-sg-${var.environment}"
+  description = "Security group for ECS Frontend tasks"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = 0
-    to_port         = 65535
+    from_port       = 80
+    to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb_internal.id]
+    security_groups = [aws_security_group.alb_public.id]
   }
 
   ingress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_public.id]
   }
 
   egress {
@@ -210,7 +203,32 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = {
-    Name = "${var.project_name}-ecs-sg-${var.environment}"
+    Name = "${var.project_name}-ecs-fe-sg-${var.environment}"
+  }
+}
+
+# Security Group for ECS Backend
+resource "aws_security_group" "ecs_backend" {
+  name        = "${var.project_name}-ecs-be-sg-${var.environment}"
+  description = "Security group for ECS Backend tasks"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_internal.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-ecs-be-sg-${var.environment}"
   }
 }
 
@@ -224,14 +242,7 @@ resource "aws_security_group" "documentdb" {
     from_port       = 27017
     to_port         = 27017
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs.id]
-  }
-
-  ingress {
-    from_port   = 27017
-    to_port     = 27017
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    security_groups = [aws_security_group.ecs_backend.id]
   }
 
   egress {
