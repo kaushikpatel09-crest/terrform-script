@@ -2,11 +2,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json ./
+# Copy package.json (package-lock.json may be absent in the workspace)
+COPY package.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (use npm install when package-lock.json is not present)
+RUN npm install --only=production --no-audit --no-fund
 
 # Copy application code
 COPY server.js .
