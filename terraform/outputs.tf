@@ -102,20 +102,20 @@ output "s3_processed_bucket" {
 }
 
 # OpenSearch Outputs
-output "opensearch_collection_id" {
-  description = "OpenSearch collection ID"
-  value       = module.opensearch.collection_id
-}
+#output "opensearch_collection_id" {
+#  description = "OpenSearch collection ID"
+#  value       = module.opensearch.collection_id
+#}
 
-output "opensearch_collection_endpoint" {
-  description = "OpenSearch collection endpoint"
-  value       = module.opensearch.collection_endpoint
-}
+#output "opensearch_collection_endpoint" {
+#  description = "OpenSearch collection endpoint"
+#  value       = module.opensearch.collection_endpoint
+#}
 
-output "opensearch_dashboard_endpoint" {
-  description = "OpenSearch dashboard endpoint"
-  value       = module.opensearch.dashboard_endpoint
-}
+#output "opensearch_dashboard_endpoint" {
+#  description = "OpenSearch dashboard endpoint"
+#  value       = module.opensearch.dashboard_endpoint
+#}
 
 # ECR Outputs
 output "ecr_frontend_repository_url" {
