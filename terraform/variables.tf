@@ -187,3 +187,9 @@ variable "certificate_arn" {
   description = "ACM certificate ARN for HTTPS"
   default     = ""
 }
+
+variable "bedrock_model_arn" {
+  type        = string
+  description = "ARN of the Bedrock model to use for inference"
+  default     = ""
+}
