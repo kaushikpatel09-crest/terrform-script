@@ -45,6 +45,16 @@ module "ecr_backend" {
   scan_on_push    = true
 }
 
+# ECR Ingestion Repository
+module "ecr_backend" {
+  source = "./modules/ecr"
+
+  repository_name = "${var.project_name}-ngestion-${var.environment}"
+  environment     = var.environment
+  project_name    = var.project_name
+  scan_on_push    = true
+}
+
 # VPC Module
 module "vpc" {
   source = "./modules/vpc"
@@ -119,6 +129,38 @@ module "ecs_backend" {
 
   depends_on = [module.vpc, module.internal_alb]
 
+}
+
+# ECS Ingestion Backend Service
+module "ecs_ingestion" {
+  source = "./modules/ecs"
+
+  environment    = var.environment
+  project_name   = var.project_name
+  cluster_name   = "${var.project_name}-ingestion-${var.environment}"
+  service_name   = "ingestion-service"
+  container_name = "ingestion"
+  container_port = 9001
+  task_cpu       = var.ingestion_task_cpu
+  task_memory    = var.ingestion_task_memory
+  desired_count  = var.ingestion_desired_count
+  min_capacity   = var.ingestion_min_capacity
+  max_capacity   = var.ingestion_max_capacity
+
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.vpc.private_subnet_ids
+  security_group_ids = [module.vpc.ecs_backend_security_group_id]
+
+  container_image     = var.ingestion_image
+  container_image_tag = var.ingestion_image_tag
+  log_group_name      = "/ecs/${var.project_name}-ingestion-${var.environment}"
+
+  # S3 bucket access
+  enable_s3_access   = true
+  s3_bucket_arns     = module.s3_buckets.all_bucket_arns
+  ecr_repository_arn = var.ecr_repository_arn
+
+  depends_on = [module.vpc, module.s3_buckets]
 }
 
 # DocumentDB Module (3rd Private Subnet)
@@ -199,48 +241,18 @@ module "s3_buckets" {
   project_name = var.project_name
 }
 
-# ECS Ingestion Backend Service
-module "ecs_ingestion" {
-  source = "./modules/ecs"
 
-  environment    = var.environment
-  project_name   = var.project_name
-  cluster_name   = "${var.project_name}-ingestion-${var.environment}"
-  service_name   = "ingestion-service"
-  container_name = "ingestion"
-  container_port = 9001
-  task_cpu       = var.ingestion_task_cpu
-  task_memory    = var.ingestion_task_memory
-  desired_count  = var.ingestion_desired_count
-  min_capacity   = var.ingestion_min_capacity
-  max_capacity   = var.ingestion_max_capacity
-
-  vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.vpc.private_subnet_ids
-  security_group_ids = [module.vpc.ecs_backend_security_group_id]
-
-  container_image     = var.ingestion_image
-  container_image_tag = var.ingestion_image_tag
-  log_group_name      = "/ecs/${var.project_name}-ingestion-${var.environment}"
-
-  # S3 bucket access
-  enable_s3_access   = true
-  s3_bucket_arns     = module.s3_buckets.all_bucket_arns
-  ecr_repository_arn = var.ecr_repository_arn
-
-  depends_on = [module.vpc, module.s3_buckets]
-}
 
 # OpenSearch Module
-module "opensearch" {
-  source = "./modules/opensearch"
+#module "opensearch" {
+#  source = "./modules/opensearch"
 
-  environment                         = var.environment
-  project_name                        = var.project_name
-  vpc_id                              = module.vpc.vpc_id
-  subnet_ids                          = module.vpc.private_subnet_ids
-  ingestion_service_security_group_id = module.vpc.ecs_backend_security_group_id
-  ingestion_service_role_arn          = module.ecs_ingestion.task_role_arn
+#  environment                         = var.environment
+#  project_name                        = var.project_name
+#  vpc_id                              = module.vpc.vpc_id
+#  subnet_ids                          = module.vpc.private_subnet_ids
+#  ingestion_service_security_group_id = module.vpc.ecs_backend_security_group_id
+#  ingestion_service_role_arn          = module.ecs_ingestion.task_role_arn
 
-  depends_on = [module.ecs_ingestion]
-}
+#  depends_on = [module.ecs_ingestion]
+#}
