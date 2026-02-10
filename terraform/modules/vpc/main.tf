@@ -63,9 +63,9 @@ resource "aws_nat_gateway" "main" {
   }
 }
 
-# Private Subnets (3 subnets)
+# Private Subnets (4 subnets)
 resource "aws_subnet" "private" {
-  count                   = 3
+  count                   = 4
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.private_subnet_cidrs[count.index]
   availability_zone       = var.availability_zones[count.index % length(var.availability_zones)]
@@ -113,7 +113,7 @@ resource "aws_route_table" "private" {
 
 # Route Table Associations for Private Subnets
 resource "aws_route_table_association" "private" {
-  count          = 3
+  count          = 4
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
 }
