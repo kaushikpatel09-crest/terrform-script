@@ -54,7 +54,7 @@ module "ecs_frontend" {
   max_capacity   = var.frontend_max_capacity
 
   vpc_id             = module.vpc.vpc_id
-  subnet_ids         = [module.vpc.private_subnet_ids[0]]
+  subnet_ids         = module.vpc.private_subnet_ids
   security_group_ids = [module.vpc.ecs_frontend_security_group_id]
 
   container_image     = var.frontend_image
@@ -83,7 +83,7 @@ module "ecs_backend" {
   max_capacity   = var.backend_max_capacity
 
   vpc_id             = module.vpc.vpc_id
-  subnet_ids         = [module.vpc.private_subnet_ids[1]]
+  subnet_ids         = module.vpc.private_subnet_ids
   security_group_ids = [module.vpc.ecs_backend_security_group_id]
 
   container_image     = var.backend_image

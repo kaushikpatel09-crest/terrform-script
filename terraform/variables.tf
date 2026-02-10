@@ -40,8 +40,8 @@ variable "private_subnet_cidrs" {
   description = "Private subnet CIDR blocks (3 subnets required)"
 
   validation {
-    condition     = length(var.private_subnet_cidrs) == 4
-    error_message = "Must provide exactly 4 rivate subnet CIDR blocks."
+    condition     = length(var.private_subnet_cidrs) == 3
+    error_message = "Must provide exactly 3 rivate subnet CIDR blocks."
   }
 }
 
