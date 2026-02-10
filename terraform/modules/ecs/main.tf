@@ -99,10 +99,13 @@ resource "aws_ecs_service" "main" {
     assign_public_ip = false
   }
 
-  load_balancer {
-    target_group_arn = var.load_balancer_target_group_arn
-    container_name   = var.container_name
-    container_port   = var.container_port
+  dynamic "load_balancer" {
+    for_each = var.load_balancer_target_group_arn != "" ? [var.load_balancer_target_group_arn] : []
+    content {
+      target_group_arn = load_balancer.value
+      container_name   = var.container_name
+      container_port   = var.container_port
+    }
   }
 
   depends_on = [aws_ecs_task_definition.main]

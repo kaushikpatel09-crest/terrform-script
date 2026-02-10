@@ -81,6 +81,8 @@ module "ecs_frontend" {
   container_image_tag = var.frontend_image_tag
   log_group_name      = "/ecs/${var.project_name}-fe-${var.environment}"
 
+  ecr_repository_arn = var.frontend_ecr_repository_arn
+
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
   depends_on = [module.vpc, module.internal_alb]
@@ -110,6 +112,8 @@ module "ecs_backend" {
   container_image_tag = var.backend_image_tag
   log_group_name      = "/ecs/${var.project_name}-be-${var.environment}"
   bedrock_model_arn   = var.bedrock_model_arn
+
+  ecr_repository_arn = var.backend_ecr_repository_arn
 
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
@@ -204,7 +208,7 @@ module "ecs_ingestion" {
   cluster_name   = "${var.project_name}-ingestion-${var.environment}"
   service_name   = "ingestion-service"
   container_name = "ingestion"
-  container_port = 8080
+  container_port = 9001
   task_cpu       = var.ingestion_task_cpu
   task_memory    = var.ingestion_task_memory
   desired_count  = var.ingestion_desired_count
@@ -213,7 +217,7 @@ module "ecs_ingestion" {
 
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = module.vpc.private_subnet_ids
-  security_group_ids = [module.vpc.ecs_security_group_id]
+  security_group_ids = [module.vpc.ecs_backend_security_group_id]
 
   container_image     = var.ingestion_image
   container_image_tag = var.ingestion_image_tag
@@ -234,7 +238,7 @@ module "opensearch" {
   environment                         = var.environment
   project_name                        = var.project_name
   vpc_id                              = module.vpc.vpc_id
-  ingestion_service_security_group_id = module.vpc.ecs_security_group_id
+  ingestion_service_security_group_id = module.vpc.ecs_backend_security_group_id
   ingestion_service_role_arn          = module.ecs_ingestion.task_role_arn
 
   depends_on = [module.ecs_ingestion]

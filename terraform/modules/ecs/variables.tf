@@ -82,7 +82,9 @@ variable "security_group_ids" {
 variable "load_balancer_target_group_arn" {
   type        = string
   description = "Load balancer target group ARN"
+  default     = ""
 }
+
 
 variable "log_group_name" {
   type        = string

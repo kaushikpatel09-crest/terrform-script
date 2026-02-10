@@ -88,6 +88,12 @@ variable "frontend_max_capacity" {
   default     = 4
 }
 
+variable "frontend_ecr_repository_arn" {
+  type        = string
+  description = "(Optional) ARN of ECR repository for Frontend image access"
+  default     = ""
+}
+
 # ECS Backend Variables
 variable "backend_image" {
   type        = string
@@ -129,6 +135,12 @@ variable "backend_max_capacity" {
   type        = number
   description = "Maximum backend capacity"
   default     = 4
+}
+
+variable "backend_ecr_repository_arn" {
+  type        = string
+  description = "(Optional) ARN of ECR repository for Backend image access"
+  default     = ""
 }
 
 # DocumentDB Variables
