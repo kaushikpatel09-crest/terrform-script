@@ -42,7 +42,7 @@ variable "target_group_name" {
 variable "target_group_port" {
   type        = number
   description = "Target group port"
-  default     = 3000
+  default     = 80
 }
 
 variable "target_type" {

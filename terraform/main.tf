@@ -93,9 +93,9 @@ module "ecs_frontend" {
 
   ecr_repository_arn = var.frontend_ecr_repository_arn
 
-  load_balancer_target_group_arn = module.internal_alb.target_group_arn
+  load_balancer_target_group_arn = module.external_alb.target_group_arn
 
-  depends_on = [module.vpc, module.internal_alb]
+  depends_on = [module.vpc, module.external_alb]
 }
 
 # ECS Backend Module
@@ -200,9 +200,9 @@ module "external_alb" {
   security_group_ids = [module.vpc.alb_public_security_group_id]
 
   target_group_name = "${var.project_name}-external-tg-${var.environment}"
-  target_group_port = 80
+  target_group_port = 3000
   target_type       = "ip"
-  health_check_path = "/"
+  health_check_path = "/health"
 
   enable_https    = var.enable_https
   certificate_arn = var.certificate_arn
@@ -224,9 +224,9 @@ module "internal_alb" {
   security_group_ids = [module.vpc.alb_internal_security_group_id]
 
   target_group_name = "${var.project_name}-internal-tg-${var.environment}"
-  target_group_port = 80
+  target_group_port = 8080
   target_type       = "ip"
-  health_check_path = "/"
+  health_check_path = "/health"
 
   enable_https = false
 
