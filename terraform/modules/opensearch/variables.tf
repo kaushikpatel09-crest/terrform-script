@@ -13,6 +13,11 @@ variable "vpc_id" {
   description = "VPC ID"
 }
 
+variable "subnet_ids" {
+  type        = list(string)
+  description = "Private subnet IDs for VPC endpoint"
+}
+
 variable "ingestion_service_security_group_id" {
   type        = string
   description = "Security group ID of the Ingestion ECS service"

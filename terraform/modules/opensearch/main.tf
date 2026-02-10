@@ -80,29 +80,10 @@ resource "aws_opensearchserverless_access_policy" "main" {
   ])
 }
 
-# OpenSearch network policy to allow VPC access
-resource "aws_opensearchserverless_network_policy" "main" {
-  name        = "${var.project_name}-opensearch-network-${var.environment}"
-  type        = "VpcEndpoint"
-  description = "Network policy for VPC access"
-  policy = jsonencode([
-    {
-      Rules = [
-        {
-          ResourceType = "collection"
-          Resource     = ["collection/${aws_opensearchserverless_collection.main.name}"]
-        },
-        {
-          ResourceType = "dashboard"
-          Resource     = ["collection/${aws_opensearchserverless_collection.main.name}"]
-        }
-      ]
-      AllowFromPublic = false
-      SourceVpcEs = [
-        {
-          VpcId = var.vpc_id
-        }
-      ]
-    }
-  ])
+# OpenSearch VPC endpoint for private access
+resource "aws_opensearchserverless_vpc_endpoint" "main" {
+  name               = "${var.project_name}-opensearch-vpc-ep-${var.environment}"
+  vpc_id             = var.vpc_id
+  subnet_ids         = var.subnet_ids
+  security_group_ids = [aws_security_group.opensearch.id]
 }
