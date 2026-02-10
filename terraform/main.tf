@@ -89,10 +89,12 @@ module "ecs_backend" {
   container_image     = var.backend_image
   container_image_tag = var.backend_image_tag
   log_group_name      = "/ecs/${var.project_name}-be-${var.environment}"
+  bedrock_model_arn   = var.bedrock_model_arn
 
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
   depends_on = [module.vpc, module.internal_alb]
+
 }
 
 # DocumentDB Module (3rd Private Subnet)
