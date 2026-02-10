@@ -46,10 +46,10 @@ module "ecr_backend" {
 }
 
 # ECR Ingestion Repository
-module "ecr_backend" {
+module "ecr_ingestion" {
   source = "./modules/ecr"
 
-  repository_name = "${var.project_name}-ngestion-${var.environment}"
+  repository_name = "${var.project_name}-ingestion-${var.environment}"
   environment     = var.environment
   project_name    = var.project_name
   scan_on_push    = true
