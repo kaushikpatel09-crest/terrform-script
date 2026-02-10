@@ -88,3 +88,9 @@ variable "log_group_name" {
   type        = string
   description = "CloudWatch log group name"
 }
+
+variable "bedrock_model_arn" {
+  type        = string
+  description = "(Optional) ARN of the Bedrock model that this service is allowed to invoke. Leave empty to skip granting Bedrock permissions."
+  default     = ""
+}

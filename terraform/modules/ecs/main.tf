@@ -198,5 +198,27 @@ resource "aws_iam_role" "ecs_task_role" {
   }
 }
 
+# Optional inline policy granting permission to invoke a specific Bedrock model
+resource "aws_iam_role_policy" "ecs_bedrock_invoke" {
+  count = var.bedrock_model_arn != "" ? 1 : 0
+
+  name = "${var.project_name}-ecs-bedrock-invoke-${var.service_name}-${var.environment}"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
+        ],
+        Resource = var.bedrock_model_arn
+      }
+    ]
+  })
+}
+
 # Data source to get current AWS region
 data "aws_region" "current" {}

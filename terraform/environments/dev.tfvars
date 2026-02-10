@@ -24,6 +24,7 @@ backend_task_memory   = 512
 backend_desired_count = 1
 backend_min_capacity  = 1
 backend_max_capacity  = 2
+bedrock_model_arn     = "arn:aws:bedrock:us-east-1:943143228843:inference-profile/us.twelvelabs.marengo-embed-3-0-v1:0" # Update with your Bedrock model ARN
 
 # DocumentDB Configuration
 documentdb_engine_version        = "4.0.0"
