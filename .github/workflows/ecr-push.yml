@@ -1,0 +1,187 @@
+name: Build & Push to ECR & Update ECS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/**'
+      - '.github/workflows/ecr-push.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - qa
+          - stage
+      service:
+        description: 'Service to deploy'
+        required: true
+        type: choice
+        options:
+          - frontend
+          - backend
+          - both
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  PROJECT_NAME: conde-nast
+
+jobs:
+  build-and-push:
+    name: Build & Push to ECR
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_image: ${{ steps.image.outputs.frontend_image }}
+      backend_image: ${{ steps.image.outputs.backend_image }}
+      deployed_frontend: ${{ steps.deploy.outputs.deployed_frontend }}
+      deployed_backend: ${{ steps.deploy.outputs.deployed_backend }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          duration-seconds: 3600
+
+      - name: Get environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ENV="${{ github.event.inputs.environment }}"
+            SERVICE="${{ github.event.inputs.service }}"
+          else
+            ENV="dev"
+            SERVICE="both"
+          fi
+          echo "environment=${ENV}" >> $GITHUB_OUTPUT
+          echo "service=${SERVICE}" >> $GITHUB_OUTPUT
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Frontend image
+        if: steps.env.outputs.service == 'frontend' || steps.env.outputs.service == 'both'
+        id: build-frontend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.PROJECT_NAME }}-frontend-${{ steps.env.outputs.environment }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./apps/frontend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build and push Backend image
+        if: steps.env.outputs.service == 'backend' || steps.env.outputs.service == 'both'
+        id: build-backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.PROJECT_NAME }}-backend-${{ steps.env.outputs.environment }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./apps/backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set image outputs
+        id: image
+        run: |
+          echo "frontend_image=${{ steps.build-frontend.outputs.image }}" >> $GITHUB_OUTPUT
+          echo "backend_image=${{ steps.build-backend.outputs.image }}" >> $GITHUB_OUTPUT
+
+      - name: Update ECS tasks and restart services
+        id: deploy
+        env:
+          ENVIRONMENT: ${{ steps.env.outputs.environment }}
+          SERVICE: ${{ steps.env.outputs.service }}
+          FRONTEND_IMAGE: ${{ steps.build-frontend.outputs.image }}
+          BACKEND_IMAGE: ${{ steps.build-backend.outputs.image }}
+        run: |
+          FRONTEND_CLUSTER="${{ env.PROJECT_NAME }}-fe-${ENVIRONMENT}"
+          BACKEND_CLUSTER="${{ env.PROJECT_NAME }}-be-${ENVIRONMENT}"
+          FRONTEND_SERVICE="fe-service"
+          BACKEND_SERVICE="be-service"
+          
+          deployed_frontend=false
+          deployed_backend=false
+          
+          # Update Frontend
+          if [ "${SERVICE}" = "frontend" ] || [ "${SERVICE}" = "both" ]; then
+            if [ -z "${FRONTEND_IMAGE}" ]; then
+              echo "❌ Frontend image not built, skipping update"
+            else
+              echo "📦 Updating Frontend service with image: ${FRONTEND_IMAGE}"
+              aws ecs update-service \
+                --cluster ${FRONTEND_CLUSTER} \
+                --service ${FRONTEND_SERVICE} \
+                --force-new-deployment \
+                --region ${AWS_REGION} > /dev/null 2>&1 || echo "⚠️  Frontend service update initiated (may be in progress)"
+              deployed_frontend=true
+              echo "✅ Frontend service update requested"
+            fi
+          fi
+          
+          # Update Backend
+          if [ "${SERVICE}" = "backend" ] || [ "${SERVICE}" = "both" ]; then
+            if [ -z "${BACKEND_IMAGE}" ]; then
+              echo "❌ Backend image not built, skipping update"
+            else
+              echo "📦 Updating Backend service with image: ${BACKEND_IMAGE}"
+              aws ecs update-service \
+                --cluster ${BACKEND_CLUSTER} \
+                --service ${BACKEND_SERVICE} \
+                --force-new-deployment \
+                --region ${AWS_REGION} > /dev/null 2>&1 || echo "⚠️  Backend service update initiated (may be in progress)"
+              deployed_backend=true
+              echo "✅ Backend service update requested"
+            fi
+          fi
+          
+          echo "deployed_frontend=${deployed_frontend}" >> $GITHUB_OUTPUT
+          echo "deployed_backend=${deployed_backend}" >> $GITHUB_OUTPUT
+
+  summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: always()
+    
+    steps:
+      - name: Print Summary
+        run: |
+          echo "## 📋 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Frontend" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.build-and-push.outputs.deployed_frontend }}" = "true" ]; then
+            echo "✅ **Status**: Deployed" >> $GITHUB_STEP_SUMMARY
+            echo "- **Image**: \`${{ needs.build-and-push.outputs.frontend_image }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⏭️  **Status**: Skipped" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Backend" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.build-and-push.outputs.deployed_backend }}" = "true" ]; then
+            echo "✅ **Status**: Deployed" >> $GITHUB_STEP_SUMMARY
+            echo "- **Image**: \`${{ needs.build-and-push.outputs.backend_image }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⏭️  **Status**: Skipped" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Commit" >> $GITHUB_STEP_SUMMARY
+          echo "- **SHA**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY

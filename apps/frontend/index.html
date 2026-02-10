@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Condé Nast Frontend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        h1 { color: #fff; }
+        .button {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .button:hover { background: #764ba2; }
+        #response {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .status.success { background: #4caf50; }
+        .status.error { background: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Condé Nast Frontend</h1>
+        <p>Frontend Application running in ECS</p>
+        <p>Environment: <strong id="env">loading...</strong></p>
+        
+        <div>
+            <h2>Test Backend Connection</h2>
+            <button class="button" onclick="callBackend()">Call Backend API</button>
+            <button class="button" onclick="clearResponse()">Clear Response</button>
+        </div>
+        
+        <div id="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Load environment on page load
+        window.onload = function() {
+            document.getElementById('env').textContent = 'Development';
+            console.log('Frontend loaded successfully');
+        };
+
+        function callBackend() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = 'Calling backend API...';
+            responseDiv.style.display = 'block';
+
+            // Try internal ALB DNS (when deployed in ECS)
+            const backendUrl = 'http://internal-alb:80/api/health';
+            
+            fetch(backendUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                responseDiv.innerHTML = `<span class="status success">✓ Success</span><br><br>${JSON.stringify(data, null, 2)}`;
+            })
+            .catch(error => {
+                responseDiv.innerHTML = `<span class="status error">✗ Error</span><br><br>Backend Error: ${error.message}<br><br>Note: Backend must be running at: ${backendUrl}`;
+            });
+        }
+
+        function clearResponse() {
+            document.getElementById('response').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
