@@ -1,16 +1,13 @@
-FROM nginx:alpine
+FROM python:3.11-slim
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+WORKDIR /app
 
-# Copy application files
-COPY index.html /usr/share/nginx/html/index.html
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port 80
-EXPOSE 80
+COPY app.py .
+COPY templates ./templates
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+EXPOSE 3000
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["python", "app.py"]
