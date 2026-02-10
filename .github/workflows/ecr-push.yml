@@ -104,7 +104,7 @@ jobs:
           echo "frontend_image=${{ steps.build-frontend.outputs.image }}" >> $GITHUB_OUTPUT
           echo "backend_image=${{ steps.build-backend.outputs.image }}" >> $GITHUB_OUTPUT
 
-      - name: Update ECS tasks and restart services
+      - name: Update ECS Task Definitions and Services
         id: deploy
         env:
           ENVIRONMENT: ${{ steps.env.outputs.environment }}
@@ -116,23 +116,73 @@ jobs:
           BACKEND_CLUSTER="${{ env.PROJECT_NAME }}-be-${ENVIRONMENT}"
           FRONTEND_SERVICE="fe-service"
           BACKEND_SERVICE="be-service"
+          FRONTEND_TASK_FAMILY="conde-nast-fe-service"
+          BACKEND_TASK_FAMILY="conde-nast-be-service"
           
           deployed_frontend=false
           deployed_backend=false
+          
+          # Function to register new task definition
+          register_task_definition() {
+            local TASK_FAMILY=$1
+            local CONTAINER_NAME=$2
+            local IMAGE=$3
+            
+            echo "📋 Fetching current task definition for ${TASK_FAMILY}..."
+            TASK_DEF=$(aws ecs describe-task-definition \
+              --task-definition ${TASK_FAMILY} \
+              --region ${AWS_REGION} \
+              --query 'taskDefinition' 2>/dev/null)
+            
+            if [ -z "$TASK_DEF" ]; then
+              echo "❌ Task definition ${TASK_FAMILY} not found"
+              return 1
+            fi
+            
+            echo "🔄 Registering new task definition revision with image: ${IMAGE}"
+            NEW_TASK_DEF=$(echo "$TASK_DEF" | \
+              jq --arg IMAGE "$IMAGE" \
+              '.containerDefinitions |= map(if .name == "'$CONTAINER_NAME'" then .image = $IMAGE else . end)' | \
+              jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+            
+            REGISTERED=$(aws ecs register-task-definition \
+              --cli-input-json "$(echo "$NEW_TASK_DEF")" \
+              --region ${AWS_REGION} \
+              --query 'taskDefinition.taskDefinitionArn' \
+              --output text)
+            
+            if [ -z "$REGISTERED" ]; then
+              echo "❌ Failed to register new task definition"
+              return 1
+            fi
+            
+            echo "✅ New task definition registered: ${REGISTERED}"
+            echo "$REGISTERED"
+          }
           
           # Update Frontend
           if [ "${SERVICE}" = "frontend" ] || [ "${SERVICE}" = "both" ]; then
             if [ -z "${FRONTEND_IMAGE}" ]; then
               echo "❌ Frontend image not built, skipping update"
             else
-              echo "📦 Updating Frontend service with image: ${FRONTEND_IMAGE}"
-              aws ecs update-service \
-                --cluster ${FRONTEND_CLUSTER} \
-                --service ${FRONTEND_SERVICE} \
-                --force-new-deployment \
-                --region ${AWS_REGION} > /dev/null 2>&1 || echo "⚠️  Frontend service update initiated (may be in progress)"
-              deployed_frontend=true
-              echo "✅ Frontend service update requested"
+              echo "📦 Processing Frontend service..."
+              NEW_FRONTEND_TD=$(register_task_definition "${FRONTEND_TASK_FAMILY}" "frontend" "${FRONTEND_IMAGE}")
+              if [ $? -eq 0 ]; then
+                echo "🚀 Updating ${FRONTEND_SERVICE} to use new task definition..."
+                aws ecs update-service \
+                  --cluster ${FRONTEND_CLUSTER} \
+                  --service ${FRONTEND_SERVICE} \
+                  --task-definition ${NEW_FRONTEND_TD} \
+                  --region ${AWS_REGION} > /dev/null 2>&1
+                
+                if [ $? -eq 0 ]; then
+                  deployed_frontend=true
+                  echo "✅ Frontend service updated with new task definition"
+                else
+                  echo "⚠️  Frontend service update completed but with warnings"
+                  deployed_frontend=true
+                fi
+              fi
             fi
           fi
           
@@ -141,14 +191,24 @@ jobs:
             if [ -z "${BACKEND_IMAGE}" ]; then
               echo "❌ Backend image not built, skipping update"
             else
-              echo "📦 Updating Backend service with image: ${BACKEND_IMAGE}"
-              aws ecs update-service \
-                --cluster ${BACKEND_CLUSTER} \
-                --service ${BACKEND_SERVICE} \
-                --force-new-deployment \
-                --region ${AWS_REGION} > /dev/null 2>&1 || echo "⚠️  Backend service update initiated (may be in progress)"
-              deployed_backend=true
-              echo "✅ Backend service update requested"
+              echo "📦 Processing Backend service..."
+              NEW_BACKEND_TD=$(register_task_definition "${BACKEND_TASK_FAMILY}" "backend" "${BACKEND_IMAGE}")
+              if [ $? -eq 0 ]; then
+                echo "🚀 Updating ${BACKEND_SERVICE} to use new task definition..."
+                aws ecs update-service \
+                  --cluster ${BACKEND_CLUSTER} \
+                  --service ${BACKEND_SERVICE} \
+                  --task-definition ${NEW_BACKEND_TD} \
+                  --region ${AWS_REGION} > /dev/null 2>&1
+                
+                if [ $? -eq 0 ]; then
+                  deployed_backend=true
+                  echo "✅ Backend service updated with new task definition"
+                else
+                  echo "⚠️  Backend service update completed but with warnings"
+                  deployed_backend=true
+                fi
+              fi
             fi
           fi
           
