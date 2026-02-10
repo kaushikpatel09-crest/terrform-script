@@ -54,7 +54,7 @@ variable "target_type" {
 variable "health_check_path" {
   type        = string
   description = "Health check path"
-  default     = "/"
+  default     = "/health"
 }
 
 variable "enable_https" {
