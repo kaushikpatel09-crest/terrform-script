@@ -128,25 +128,25 @@ jobs:
             local CONTAINER_NAME=$2
             local IMAGE=$3
             
-            echo "📋 Fetching current task definition for ${TASK_FAMILY}..."
+            echo "📋 Fetching current task definition for ${TASK_FAMILY}..." >&2
             TASK_DEF=$(aws ecs describe-task-definition \
               --task-definition ${TASK_FAMILY} \
               --region ${AWS_REGION} \
               --query 'taskDefinition')
             
             if [ -z "$TASK_DEF" ]; then
-              echo "❌ Task definition ${TASK_FAMILY} not found"
+              echo "❌ Task definition ${TASK_FAMILY} not found" >&2
               return 1
             fi
             
-            echo "🔄 Registering new task definition revision with image: ${IMAGE}"
+            echo "🔄 Registering new task definition revision with image: ${IMAGE}" >&2
             NEW_TASK_DEF=$(echo "$TASK_DEF" | \
               jq --arg CONTAINER_NAME "$CONTAINER_NAME" --arg IMAGE "$IMAGE" \
               '.containerDefinitions |= map(if .name == $CONTAINER_NAME then .image = $IMAGE else . end)' | \
               jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
             
             if [ -z "$NEW_TASK_DEF" ]; then
-              echo "❌ Failed to modify task definition JSON"
+              echo "❌ Failed to modify task definition JSON" >&2
               return 1
             fi
             
@@ -157,11 +157,11 @@ jobs:
               --output text 2>&1)
             
             if [ -z "$REGISTERED" ] || echo "$REGISTERED" | grep -q "Error\|error"; then
-              echo "❌ Failed to register new task definition: $REGISTERED"
+              echo "❌ Failed to register new task definition: $REGISTERED" >&2
               return 1
             fi
             
-            echo "✅ New task definition registered: ${REGISTERED}"
+            echo "✅ New task definition registered: ${REGISTERED}" >&2
             echo "$REGISTERED"
           }
           
