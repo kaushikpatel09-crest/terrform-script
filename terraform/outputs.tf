@@ -84,3 +84,24 @@ output "internal_alb_arn" {
   description = "Internal ALB ARN"
   value       = module.internal_alb.load_balancer_arn
 }
+
+# ECR Outputs
+output "ecr_frontend_repository_url" {
+  description = "ECR frontend repository URL"
+  value       = module.ecr_frontend.repository_url
+}
+
+output "ecr_frontend_repository_name" {
+  description = "ECR frontend repository name"
+  value       = module.ecr_frontend.repository_name
+}
+
+output "ecr_backend_repository_url" {
+  description = "ECR backend repository URL"
+  value       = module.ecr_backend.repository_url
+}
+
+output "ecr_backend_repository_name" {
+  description = "ECR backend repository name"
+  value       = module.ecr_backend.repository_name
+}

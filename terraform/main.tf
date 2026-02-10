@@ -25,6 +25,26 @@ provider "aws" {
   }
 }
 
+# ECR Frontend Repository
+module "ecr_frontend" {
+  source = "./modules/ecr"
+
+  repository_name = "${var.project_name}-frontend-${var.environment}"
+  environment     = var.environment
+  project_name    = var.project_name
+  scan_on_push    = true
+}
+
+# ECR Backend Repository
+module "ecr_backend" {
+  source = "./modules/ecr"
+
+  repository_name = "${var.project_name}-backend-${var.environment}"
+  environment     = var.environment
+  project_name    = var.project_name
+  scan_on_push    = true
+}
+
 # VPC Module
 module "vpc" {
   source = "./modules/vpc"
