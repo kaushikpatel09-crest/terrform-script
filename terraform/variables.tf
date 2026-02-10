@@ -193,3 +193,52 @@ variable "bedrock_model_arn" {
   description = "ARN of the Bedrock model to use for inference"
   default     = ""
 }
+
+# Ingestion Service Variables
+variable "ingestion_image" {
+  type        = string
+  description = "Container image for Ingestion service"
+  default     = "node"
+}
+
+variable "ingestion_image_tag" {
+  type        = string
+  description = "Container image tag for Ingestion service"
+  default     = "18-alpine"
+}
+
+variable "ingestion_task_cpu" {
+  type        = number
+  description = "Ingestion task CPU (256, 512, 1024, 2048, 4096)"
+  default     = 512
+}
+
+variable "ingestion_task_memory" {
+  type        = number
+  description = "Ingestion task memory in MB"
+  default     = 1024
+}
+
+variable "ingestion_desired_count" {
+  type        = number
+  description = "Desired number of Ingestion tasks"
+  default     = 1
+}
+
+variable "ingestion_min_capacity" {
+  type        = number
+  description = "Minimum Ingestion capacity"
+  default     = 1
+}
+
+variable "ingestion_max_capacity" {
+  type        = number
+  description = "Maximum Ingestion capacity"
+  default     = 3
+}
+
+variable "ecr_repository_arn" {
+  type        = string
+  description = "(Optional) ARN of ECR repository for image access"
+  default     = ""
+}

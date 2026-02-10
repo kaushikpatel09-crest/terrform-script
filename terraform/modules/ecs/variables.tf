@@ -94,3 +94,21 @@ variable "bedrock_model_arn" {
   description = "(Optional) ARN of the Bedrock model that this service is allowed to invoke. Leave empty to skip granting Bedrock permissions."
   default     = ""
 }
+
+variable "s3_bucket_arns" {
+  type        = list(string)
+  description = "(Optional) List of S3 bucket ARNs that this service is allowed to access. Leave empty to skip granting S3 permissions."
+  default     = []
+}
+
+variable "enable_s3_access" {
+  type        = bool
+  description = "Enable S3 CRUD access for this ECS service"
+  default     = false
+}
+
+variable "ecr_repository_arn" {
+  type        = string
+  description = "(Optional) ARN of ECR repository for image access. Leave empty to skip granting ECR permissions."
+  default     = ""
+}

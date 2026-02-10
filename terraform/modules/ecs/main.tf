@@ -24,7 +24,7 @@ resource "aws_ecs_cluster" "main" {
   setting {
     name  = "containerInsights"
     value = "disabled"
-   # value = "enabled"
+    # value = "enabled"
   }
 
   tags = {
@@ -237,6 +237,56 @@ resource "aws_iam_role_policy" "ecs_bedrock_invoke" {
           "bedrock:InvokeModelWithResponseStream"
         ],
         Resource = var.bedrock_model_arn
+      }
+    ]
+  })
+}
+
+# Optional inline policy granting S3 CRUD access to specified buckets
+resource "aws_iam_role_policy" "ecs_s3_access" {
+  count = var.enable_s3_access && length(var.s3_bucket_arns) > 0 ? 1 : 0
+
+  name = "${var.project_name}-ecs-s3-access-${var.service_name}-${var.environment}"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ],
+        Resource = concat(
+          var.s3_bucket_arns,
+          [for arn in var.s3_bucket_arns : "${arn}/*"]
+        )
+      }
+    ]
+  })
+}
+
+# Optional inline policy granting ECR repository access
+resource "aws_iam_role_policy" "ecs_ecr_access" {
+  count = var.ecr_repository_arn != "" ? 1 : 0
+
+  name = "${var.project_name}-ecs-ecr-access-${var.service_name}-${var.environment}"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:DescribeImages"
+        ],
+        Resource = var.ecr_repository_arn
       }
     ]
   })
