@@ -2,23 +2,29 @@ name: Build & Push to ECR & Update ECS
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
-      - "apps/**"
-      - ".github/workflows/ecr-push.yml"
-
+      - 'apps/**'
+      - '.github/workflows/ecr-push.yml'
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment"
+        description: 'Environment to deploy'
         required: true
         type: choice
-        options: [ dev, qa, stage ]
+        options:
+          - dev
+          - qa
+          - stage
       service:
-        description: "Service"
+        description: 'Service to deploy'
         required: true
         type: choice
-        options: [ frontend, backend, both ]
+        options:
+          - frontend
+          - backend
+          - both
 
 permissions:
   id-token: write
@@ -29,21 +35,28 @@ env:
   PROJECT_NAME: conde-nast
 
 jobs:
-  deploy:
+  build-and-push:
+    name: Build & Push to ECR
     runs-on: ubuntu-latest
-
+    outputs:
+      frontend_image: ${{ steps.image.outputs.frontend_image }}
+      backend_image: ${{ steps.image.outputs.backend_image }}
+      deployed_frontend: ${{ steps.deploy.outputs.deployed_frontend }}
+      deployed_backend: ${{ steps.deploy.outputs.deployed_backend }}
+    
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials (OIDC)
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          duration-seconds: 3600
 
-      - name: Resolve inputs
-        id: vars
+      - name: Get environment
+        id: env
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             ENV="${{ github.event.inputs.environment }}"
@@ -52,99 +65,190 @@ jobs:
             ENV="dev"
             SERVICE="both"
           fi
-
-          echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "service=$SERVICE" >> $GITHUB_OUTPUT
+          echo "environment=${ENV}" >> $GITHUB_OUTPUT
+          echo "service=${SERVICE}" >> $GITHUB_OUTPUT
 
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # ---------- BUILD & PUSH ----------
-      - name: Build & Push Frontend
-        if: steps.vars.outputs.service == 'frontend' || steps.vars.outputs.service == 'both'
-        id: fe
+      - name: Build and push Frontend image
+        if: steps.env.outputs.service == 'frontend' || steps.env.outputs.service == 'both'
+        id: build-frontend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.PROJECT_NAME }}-frontend-${{ steps.env.outputs.environment }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE="${{ env.PROJECT_NAME }}-frontend-${{ steps.vars.outputs.env }}"
-          TAG="${{ github.sha }}"
-          docker build -t $IMAGE:$TAG ./apps/frontend
-          docker tag $IMAGE:$TAG ${{ steps.login-ecr.outputs.registry }}/$IMAGE:$TAG
-          docker push ${{ steps.login-ecr.outputs.registry }}/$IMAGE:$TAG
-          echo "image=${{ steps.login-ecr.outputs.registry }}/$IMAGE:$TAG" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./apps/frontend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Build & Push Backend
-        if: steps.vars.outputs.service == 'backend' || steps.vars.outputs.service == 'both'
-        id: be
+      - name: Build and push Backend image
+        if: steps.env.outputs.service == 'backend' || steps.env.outputs.service == 'both'
+        id: build-backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.PROJECT_NAME }}-backend-${{ steps.env.outputs.environment }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE="${{ env.PROJECT_NAME }}-backend-${{ steps.vars.outputs.env }}"
-          TAG="${{ github.sha }}"
-          docker build -t $IMAGE:$TAG ./apps/backend
-          docker tag $IMAGE:$TAG ${{ steps.login-ecr.outputs.registry }}/$IMAGE:$TAG
-          docker push ${{ steps.login-ecr.outputs.registry }}/$IMAGE:$TAG
-          echo "image=${{ steps.login-ecr.outputs.registry }}/$IMAGE:$TAG" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./apps/backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # ---------- DEPLOY ----------
-      - name: Update ECS
+      - name: Set image outputs
+        id: image
         run: |
-          set -euo pipefail
+          echo "frontend_image=${{ steps.build-frontend.outputs.image }}" >> $GITHUB_OUTPUT
+          echo "backend_image=${{ steps.build-backend.outputs.image }}" >> $GITHUB_OUTPUT
 
-          ENV="${{ steps.vars.outputs.env }}"
-          SERVICE="${{ steps.vars.outputs.service }}"
-
-          FRONTEND_IMAGE="${{ steps.fe.outputs.image || '' }}"
-          BACKEND_IMAGE="${{ steps.be.outputs.image || '' }}"
-
-          FRONTEND_CLUSTER="conde-nast-fe-${ENV}"
-          BACKEND_CLUSTER="conde-nast-be-${ENV}"
-
+      - name: Update ECS Task Definitions and Services
+        id: deploy
+        env:
+          ENVIRONMENT: ${{ steps.env.outputs.environment }}
+          SERVICE: ${{ steps.env.outputs.service }}
+          FRONTEND_IMAGE: ${{ steps.build-frontend.outputs.image }}
+          BACKEND_IMAGE: ${{ steps.build-backend.outputs.image }}
+        run: |
+          FRONTEND_CLUSTER="${{ env.PROJECT_NAME }}-fe-${ENVIRONMENT}"
+          BACKEND_CLUSTER="${{ env.PROJECT_NAME }}-be-${ENVIRONMENT}"
           FRONTEND_SERVICE="fe-service"
           BACKEND_SERVICE="be-service"
-
-          FRONTEND_TASK="conde-nast-fe-service"
-          BACKEND_TASK="conde-nast-be-service"
-
-          register_task_definition () {
-            TASK_FAMILY=$1
-            CONTAINER_NAME=$2
-            IMAGE=$3
-
+          FRONTEND_TASK_FAMILY="conde-nast-fe-service"
+          BACKEND_TASK_FAMILY="conde-nast-be-service"
+          
+          deployed_frontend=false
+          deployed_backend=false
+          
+          # Function to register new task definition
+          register_task_definition() {
+            local TASK_FAMILY=$1
+            local CONTAINER_NAME=$2
+            local IMAGE=$3
+            
+            echo "📋 Fetching current task definition for ${TASK_FAMILY}..."
             TASK_DEF=$(aws ecs describe-task-definition \
-              --task-definition $TASK_FAMILY \
-              --query taskDefinition)
-
-            NEW_DEF=$(echo "$TASK_DEF" | jq --arg IMG "$IMAGE" \
-              '.containerDefinitions |= map(
-                if .name=="'"$CONTAINER_NAME"'" then .image=$IMG else . end
-              )
-              | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)'
-            )
-
-            aws ecs register-task-definition \
-              --cli-input-json "$NEW_DEF" \
-              --query taskDefinition.taskDefinitionArn \
-              --output text
+              --task-definition ${TASK_FAMILY} \
+              --region ${AWS_REGION} \
+              --query 'taskDefinition')
+            
+            if [ -z "$TASK_DEF" ]; then
+              echo "❌ Task definition ${TASK_FAMILY} not found"
+              return 1
+            fi
+            
+            echo "🔄 Registering new task definition revision with image: ${IMAGE}"
+            NEW_TASK_DEF=$(echo "$TASK_DEF" | \
+              jq --arg CONTAINER_NAME "$CONTAINER_NAME" --arg IMAGE "$IMAGE" \
+              '.containerDefinitions |= map(if .name == $CONTAINER_NAME then .image = $IMAGE else . end)' | \
+              jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+            
+            if [ -z "$NEW_TASK_DEF" ]; then
+              echo "❌ Failed to modify task definition JSON"
+              return 1
+            fi
+            
+            REGISTERED=$(aws ecs register-task-definition \
+              --cli-input-json "$NEW_TASK_DEF" \
+              --region ${AWS_REGION} \
+              --query 'taskDefinition.taskDefinitionArn' \
+              --output text 2>&1)
+            
+            if [ -z "$REGISTERED" ] || echo "$REGISTERED" | grep -q "Error\|error"; then
+              echo "❌ Failed to register new task definition: $REGISTERED"
+              return 1
+            fi
+            
+            echo "✅ New task definition registered: ${REGISTERED}"
+            echo "$REGISTERED"
           }
-
-          if [[ "$SERVICE" == "frontend" || "$SERVICE" == "both" ]]; then
-            TD=$(register_task_definition "$FRONTEND_TASK" "frontend" "$FRONTEND_IMAGE")
-            aws ecs update-service \
-              --cluster $FRONTEND_CLUSTER \
-              --service $FRONTEND_SERVICE \
-              --task-definition $TD
+          
+          # Update Frontend
+          if [ "${SERVICE}" = "frontend" ] || [ "${SERVICE}" = "both" ]; then
+            if [ -z "${FRONTEND_IMAGE}" ]; then
+              echo "❌ Frontend image not built, skipping update"
+            else
+              echo "📦 Processing Frontend service..."
+              NEW_FRONTEND_TD=$(register_task_definition "${FRONTEND_TASK_FAMILY}" "frontend" "${FRONTEND_IMAGE}")
+              if [ $? -eq 0 ]; then
+                echo "🚀 Updating ${FRONTEND_SERVICE} to use new task definition: ${NEW_FRONTEND_TD}..."
+                UPDATE_OUTPUT=$(aws ecs update-service \
+                  --cluster ${FRONTEND_CLUSTER} \
+                  --service ${FRONTEND_SERVICE} \
+                  --task-definition ${NEW_FRONTEND_TD} \
+                  --region ${AWS_REGION} 2>&1)
+                
+                if [ $? -eq 0 ]; then
+                  deployed_frontend=true
+                  echo "✅ Frontend service updated with new task definition"
+                else
+                  echo "❌ Frontend service update failed: $UPDATE_OUTPUT"
+                fi
+              else
+                echo "❌ Failed to register frontend task definition"
+              fi
+            fi
           fi
-
-          if [[ "$SERVICE" == "backend" || "$SERVICE" == "both" ]]; then
-            TD=$(register_task_definition "$BACKEND_TASK" "backend" "$BACKEND_IMAGE")
-            aws ecs update-service \
-              --cluster $BACKEND_CLUSTER \
-              --service $BACKEND_SERVICE \
-              --task-definition $TD
+          
+          # Update Backend
+          if [ "${SERVICE}" = "backend" ] || [ "${SERVICE}" = "both" ]; then
+            if [ -z "${BACKEND_IMAGE}" ]; then
+              echo "❌ Backend image not built, skipping update"
+            else
+              echo "📦 Processing Backend service..."
+              NEW_BACKEND_TD=$(register_task_definition "${BACKEND_TASK_FAMILY}" "backend" "${BACKEND_IMAGE}")
+              if [ $? -eq 0 ]; then
+                echo "🚀 Updating ${BACKEND_SERVICE} to use new task definition: ${NEW_BACKEND_TD}..."
+                UPDATE_OUTPUT=$(aws ecs update-service \
+                  --cluster ${BACKEND_CLUSTER} \
+                  --service ${BACKEND_SERVICE} \
+                  --task-definition ${NEW_BACKEND_TD} \
+                  --region ${AWS_REGION} 2>&1)
+                
+                if [ $? -eq 0 ]; then
+                  deployed_backend=true
+                  echo "✅ Backend service updated with new task definition"
+                else
+                  echo "❌ Backend service update failed: $UPDATE_OUTPUT"
+                fi
+              else
+                echo "❌ Failed to register backend task definition"
+              fi
+            fi
           fi
+          
+          echo "deployed_frontend=${deployed_frontend}" >> $GITHUB_OUTPUT
+          echo "deployed_backend=${deployed_backend}" >> $GITHUB_OUTPUT
 
-      - name: Wait for ECS stability
+  summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: always()
+    
+    steps:
+      - name: Print Summary
         run: |
-          aws ecs wait services-stable \
-            --cluster conde-nast-fe-${{ steps.vars.outputs.env }} \
-            --services fe-service || true
-          aws ecs wait services-stable \
-            --cluster conde-nast-be-${{ steps.vars.outputs.env }} \
-            --services be-service || true
+          echo "## 📋 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Frontend" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.build-and-push.outputs.deployed_frontend }}" = "true" ]; then
+            echo "✅ **Status**: Deployed" >> $GITHUB_STEP_SUMMARY
+            echo "- **Image**: \`${{ needs.build-and-push.outputs.frontend_image }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⏭️  **Status**: Skipped" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Backend" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.build-and-push.outputs.deployed_backend }}" = "true" ]; then
+            echo "✅ **Status**: Deployed" >> $GITHUB_STEP_SUMMARY
+            echo "- **Image**: \`${{ needs.build-and-push.outputs.backend_image }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⏭️  **Status**: Skipped" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Commit" >> $GITHUB_STEP_SUMMARY
+          echo "- **SHA**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
