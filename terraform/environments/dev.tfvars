@@ -8,7 +8,7 @@ public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24", "10.0.30.0/24"]
 
 # ECS Frontend Configuration
-frontend_image              = "nginx"
+frontend_image              = "943143228843.dkr.ecr.us-east-1.amazonaws.com/conde-nast-frontend-dev"
 frontend_image_tag          = "latest"
 frontend_task_cpu           = 256
 frontend_task_memory        = 512
@@ -18,8 +18,8 @@ frontend_max_capacity       = 2
 frontend_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-frontend" # Update with your ECR repo ARN
 
 # ECS Backend Configuration
-backend_image              = "node"
-backend_image_tag          = "18-alpine"
+backend_image              = "943143228843.dkr.ecr.us-east-1.amazonaws.com/conde-nast-backend-dev"
+backend_image_tag          = "latest"
 backend_task_cpu           = 256
 backend_task_memory        = 512
 backend_desired_count      = 1
