@@ -247,7 +247,7 @@ module "s3_buckets" {
 
 
 
-# OpenSearch Module
+# #OpenSearch Module
 #module "opensearch" {
 #  source = "./modules/opensearch"
 
