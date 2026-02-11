@@ -232,6 +232,32 @@ resource "aws_security_group" "ecs_backend" {
   }
 }
 
+
+# Security Group for ECS Ingestion
+resource "aws_security_group" "ecs_ingestion" {
+  name        = "${var.project_name}-ecs-ing-sg-${var.environment}"
+  description = "Security group for ECS Ingestion tasks"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "http"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-ecs-ing-sg-${var.environment}"
+  }
+}
+
 # Security Group for DocumentDB
 resource "aws_security_group" "documentdb" {
   name        = "${var.project_name}-documentdb-sg-${var.environment}"
@@ -243,6 +269,12 @@ resource "aws_security_group" "documentdb" {
     to_port         = 27017
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs_backend.id]
+  }
+  ingress {
+    from_port       = 27017
+    to_port         = 27017
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_ingestion.id]
   }
 
   egress {
