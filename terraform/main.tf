@@ -183,7 +183,7 @@ module "documentdb" {
 
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = module.vpc.private_subnet_ids
-  security_group_ids = [module.vpc.documentdb_security_group_id, module.vpc.ecs_ingestion_security_group_id]
+  security_group_ids = [module.vpc.documentdb_security_group_id]
 
   skip_final_snapshot = var.documentdb_skip_final_snapshot
 
