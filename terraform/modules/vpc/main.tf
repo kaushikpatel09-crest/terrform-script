@@ -188,7 +188,7 @@ resource "aws_security_group" "ecs_frontend" {
     security_groups = [aws_security_group.alb_public.id]
   }
 
- ingress {
+  ingress {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
