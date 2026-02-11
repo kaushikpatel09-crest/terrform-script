@@ -16,7 +16,7 @@ frontend_desired_count      = 1
 frontend_min_capacity       = 1
 frontend_max_capacity       = 2
 frontend_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-frontend" # Update with your ECR repo ARN
-backend_base_url            = "" # Will be set via GitHub Actions environment variable
+backend_base_url            = ""                                                                  # Will be set via GitHub Actions environment variable
 
 # ECS Backend Configuration
 backend_image              = "943143228843.dkr.ecr.us-east-1.amazonaws.com/conde-nast-backend-dev"
