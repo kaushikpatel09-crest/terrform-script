@@ -160,10 +160,9 @@ module "ecs_ingestion" {
   log_group_name      = "/ecs/${var.project_name}-ingestion-${var.environment}"
 
   # S3 bucket access
-  enable_s3_access   = true
-  s3_bucket_arns     = module.s3_buckets.all_bucket_arns
-  bedrock_model_arn  = var.bedrock_model_arn
-  ecr_repository_arn = var.ecr_repository_arn
+  enable_s3_access  = true
+  s3_bucket_arns    = module.s3_buckets.all_bucket_arns
+  bedrock_model_arn = var.bedrock_model_arn
 
   depends_on = [module.vpc, module.s3_buckets]
 }
