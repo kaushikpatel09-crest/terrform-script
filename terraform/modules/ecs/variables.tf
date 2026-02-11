@@ -114,3 +114,9 @@ variable "ecr_repository_arn" {
   description = "(Optional) ARN of ECR repository for image access. Leave empty to skip granting ECR permissions."
   default     = ""
 }
+
+variable "environment_variables" {
+  type = map(string)
+  description = "(Optional) Map of environment variables to set in the container. Example: { BE_BASE_URL = 'https://api.example.com' }"
+  default     = {}
+}

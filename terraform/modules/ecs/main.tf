@@ -72,12 +72,20 @@ resource "aws_ecs_task_definition" "main" {
         "awslogs-stream-prefix" = var.container_name
       }
     }
-    environment = [
-      {
-        name  = "ENVIRONMENT"
-        value = var.environment
-      }
-    ]
+    environment = concat(
+      [
+        {
+          name  = "ENVIRONMENT"
+          value = var.environment
+        }
+      ],
+      [
+        for key, value in var.environment_variables : {
+          name  = key
+          value = value
+        }
+      ]
+    )
   }])
 
   tags = {

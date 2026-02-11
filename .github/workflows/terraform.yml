@@ -79,6 +79,7 @@ jobs:
           terraform plan \
             -var-file="environments/${{ env.ENVIRONMENT }}.tfvars" \
             -var="documentdb_master_password=${{ secrets.DOCUMENTDB_PASSWORD }}" \
+            -var="backend_base_url=${{ secrets.BACKEND_BASE_URL }}" \
             -out=tfplan \
             -no-color
 
@@ -118,6 +119,7 @@ jobs:
           terraform destroy \
             -var-file="environments/${{ env.ENVIRONMENT }}.tfvars" \
             -var="documentdb_master_password=${{ secrets.DOCUMENTDB_PASSWORD }}" \
+            -var="backend_base_url=${{ secrets.BACKEND_BASE_URL }}" \
             -no-color \
             -auto-approve
 

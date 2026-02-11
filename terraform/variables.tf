@@ -94,6 +94,12 @@ variable "frontend_ecr_repository_arn" {
   default     = ""
 }
 
+variable "backend_base_url" {
+  type        = string
+  description = "Backend API base URL for frontend to connect to"
+  default     = ""
+}
+
 # ECS Backend Variables
 variable "backend_image" {
   type        = string
