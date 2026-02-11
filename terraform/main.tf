@@ -162,6 +162,7 @@ module "ecs_ingestion" {
   # S3 bucket access
   enable_s3_access   = true
   s3_bucket_arns     = module.s3_buckets.all_bucket_arns
+  bedrock_model_arn  = var.bedrock_model_arn
   ecr_repository_arn = var.ecr_repository_arn
 
   depends_on = [module.vpc, module.s3_buckets]
