@@ -281,27 +281,27 @@ resource "aws_iam_role_policy" "ecs_s3_access" {
 }
 
 # Optional inline policy granting ECR repository access
-resource "aws_iam_role_policy" "ecs_ecr_access" {
-  count = var.ecr_repository_arn != "" ? 1 : 0
+#resource "aws_iam_role_policy" "ecs_ecr_access" {
+#  count = var.ecr_repository_arn != "" ? 1 : 0
 
-  name = "${var.project_name}-ecs-ecr-access-${var.service_name}-${var.environment}"
-  role = aws_iam_role.ecs_task_role.id
+#   name = "${var.project_name}-ecs-ecr-access-${var.service_name}-${var.environment}"
+#  role = aws_iam_role.ecs_task_role.id
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:DescribeImages"
-        ],
-        Resource = var.ecr_repository_arn
-      }
-    ]
-  })
-}
+#  policy = jsonencode({
+#    Version = "2012-10-17",
+#    Statement = [
+#      {
+#        Effect = "Allow",
+#        Action = [
+#          "ecr:GetDownloadUrlForLayer",
+#          "ecr:BatchGetImage",
+#          "ecr:DescribeImages"
+#        ],
+#        Resource = var.ecr_repository_arn
+#      }
+#    ]
+#  })
+#}
 
 # Data source to get current AWS region
 data "aws_region" "current" {}
