@@ -255,7 +255,7 @@ variable "ingestion_max_capacity" {
   default     = 3
 }
 
-variable "ecr_repository_arn" {
+variable "ingestion_ecr_repository_arn" {
   type        = string
   description = "(Optional) ARN of ECR repository for image access"
   default     = ""
