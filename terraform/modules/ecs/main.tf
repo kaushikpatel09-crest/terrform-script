@@ -303,5 +303,28 @@ resource "aws_iam_role_policy" "ecs_s3_access" {
 #  })
 #}
 
+# Optional inline policy granting SQS queue access
+resource "aws_iam_role_policy" "ecs_sqs_access" {
+  count = var.sqs_queue_arn != "" ? 1 : 0
+
+  name = "${var.project_name}-ecs-sqs-access-${var.service_name}-${var.environment}"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        Resource = var.sqs_queue_arn
+      }
+    ]
+  })
+}
+
 # Data source to get current AWS region
 data "aws_region" "current" {}

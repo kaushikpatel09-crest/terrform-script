@@ -139,6 +139,29 @@ module "ecs_backend" {
 
 }
 
+# SQS Module for Landing S3 Notifications
+module "sqs_landing" {
+  source = "./modules/sqs"
+
+  environment   = var.environment
+  project_name  = var.project_name
+  queue_name    = "landing-events"
+  s3_bucket_arn = module.s3_buckets.landing_bucket_arn
+}
+
+# S3 Bucket Notification (Landing -> SQS)
+resource "aws_s3_bucket_notification" "landing_to_sqs" {
+  bucket = module.s3_buckets.landing_bucket_name
+
+  queue {
+    queue_arn     = module.sqs_landing.queue_arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_suffix = ".json" # Example filter, can be removed or adjusted
+  }
+
+  depends_on = [module.sqs_landing]
+}
+
 # ECS Ingestion Backend Service
 module "ecs_ingestion" {
   source = "./modules/ecs"
@@ -168,11 +191,14 @@ module "ecs_ingestion" {
   s3_bucket_arns     = module.s3_buckets.all_bucket_arns
   bedrock_model_arn  = var.bedrock_model_arn
   ecr_repository_arn = var.ingestion_ecr_repository_arn
-  depends_on         = [module.vpc, module.s3_buckets]
+  sqs_queue_arn      = module.sqs_landing.queue_arn
+
+  depends_on = [module.vpc, module.s3_buckets, module.sqs_landing]
+
   environment_variables = {
     OPENSEARCH_ENDPOINT = module.opensearch.collection_endpoint
+    SQS_QUEUE_URL       = module.sqs_landing.queue_url
   }
-
 }
 
 # DocumentDB Module (3rd Private Subnet)
