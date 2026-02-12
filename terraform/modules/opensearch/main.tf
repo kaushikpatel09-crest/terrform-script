@@ -9,8 +9,8 @@ terraform {
 
 # OpenSearch Serverless collection with standby replicas
 resource "aws_opensearchserverless_collection" "main" {
-  name   = "${var.project_name}-opensearch-${var.environment}"
-  type   = "SEARCH"
+  name = "${var.project_name}-opensearch-${var.environment}"
+  type = "SEARCH"
   # Enable standby replicas for higher availability
   standby_replicas = "ENABLED"
 
@@ -26,9 +26,9 @@ resource "aws_security_group" "opensearch" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
+    from_port = 443
+    to_port   = 443
+    protocol  = "tcp"
     security_groups = [
       var.ingestion_service_security_group_id,
       var.backend_service_security_group_id
