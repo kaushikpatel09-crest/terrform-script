@@ -7,12 +7,28 @@ terraform {
   }
 }
 
+# Encryption policy required for the collection
+resource "aws_opensearchserverless_security_policy" "encryption" {
+  name = "${var.project_name}-opensearch-encryption-${var.environment}"
+  type = "encryption"
+
+  policy = jsonencode({
+    Rules = [{
+      ResourceType = "collection"
+      Resource     = ["collection/${var.project_name}-opensearch-${var.environment}"]
+    }]
+    AWSOwnedKey = true
+  })
+}
+
 # OpenSearch Serverless collection with standby replicas
 resource "aws_opensearchserverless_collection" "main" {
-  name = "${var.project_name}-opensearch-${var.environment}"
-  type = "SEARCH"
-  # Enable standby replicas for higher availability
+  name            = "${var.project_name}-opensearch-${var.environment}"
+  type            = "SEARCH"
   standby_replicas = "ENABLED"
+
+  # Ensure encryption policy exists first
+  depends_on = [aws_opensearchserverless_security_policy.encryption]
 
   tags = {
     Name = "${var.project_name}-opensearch-${var.environment}"
