@@ -18,7 +18,7 @@ output "dashboard_endpoint" {
   value       = aws_opensearchserverless_collection.main.dashboard_endpoint
 }
 
+
 output "security_group_id" {
-  description = "OpenSearch security group ID"
-  value       = aws_security_group.opensearch.id
+  value = aws_security_group.aoss_endpoint.id
 }
