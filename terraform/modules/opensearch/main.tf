@@ -23,8 +23,8 @@ resource "aws_opensearchserverless_security_policy" "encryption" {
 
 # OpenSearch Serverless collection with standby replicas
 resource "aws_opensearchserverless_collection" "main" {
-  name            = "${var.project_name}-opensearch-${var.environment}"
-  type            = "SEARCH"
+  name             = "${var.project_name}-opensearch-${var.environment}"
+  type             = "SEARCH"
   standby_replicas = "ENABLED"
 
   # Ensure encryption policy exists first
