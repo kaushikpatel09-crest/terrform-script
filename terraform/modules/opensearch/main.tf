@@ -7,131 +7,118 @@ terraform {
   }
 }
 
-############################
-# Encryption Policy
-############################
+# 1. Encryption Policy (Must strictly exist before collection creation)
 resource "aws_opensearchserverless_security_policy" "encryption" {
-  name = "${var.project_name}-aoss-enc-${var.environment}"
-  type = "encryption"
-
+  name        = "${var.project_name}-encryption-${var.environment}"
+  type        = "encryption"
+  description = "Encryption policy for OpenSearch Serverless"
   policy = jsonencode({
-    Rules = [{
-      ResourceType = "collection"
-      Resource     = ["collection/${var.project_name}-opensearch-${var.environment}"]
-    }]
+    Rules = [
+      {
+        ResourceType = "collection"
+        Resource = [
+          "collection/${var.project_name}-os-${var.environment}"
+        ]
+      }
+    ]
     AWSOwnedKey = true
   })
 }
 
-############################
-# VPC Endpoint
-############################
-resource "aws_opensearchserverless_vpc_endpoint" "main" {
-  name               = "${var.project_name}-aoss-vpce-${var.environment}"
-  vpc_id             = var.vpc_id
-  subnet_ids         = var.subnet_ids
-  security_group_ids = [aws_security_group.aoss_endpoint.id]
-}
-
-############################
-# Security Group for VPC Endpoint
-############################
-resource "aws_security_group" "aoss_endpoint" {
-  name        = "${var.project_name}-aoss-sg-${var.environment}"
-  description = "Security group for OpenSearch Serverless endpoint"
+# 2. VPC Endpoint Security Group
+resource "aws_security_group" "opensearch" {
+  name        = "${var.project_name}-opensearch-sg-${var.environment}"
+  description = "Security group for OpenSearch VPC Endpoint"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description = "Allow HTTPS from ECS Backend"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    security_groups = [
-      var.backend_service_security_group_id,
-      var.ingestion_service_security_group_id
-    ]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  tags = {
+    Name = "${var.project_name}-opensearch-sg-${var.environment}"
   }
 }
 
-############################
-# Network Policy
-############################
+resource "aws_security_group_rule" "ingress_ingestion" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.opensearch.id
+  source_security_group_id = var.ingestion_service_security_group_id
+  description              = "Allow HTTPS from Ingestion ECS service"
+}
+
+resource "aws_security_group_rule" "ingress_backend" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.opensearch.id
+  source_security_group_id = var.backend_service_security_group_id
+  description              = "Allow HTTPS from Backend ECS service"
+}
+
+resource "aws_security_group_rule" "egress_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.opensearch.id
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+# 3. VPC Endpoint
+resource "aws_opensearchserverless_vpc_endpoint" "main" {
+  name               = "${var.project_name}-os-vpce-${var.environment}"
+  vpc_id             = var.vpc_id
+  subnet_ids         = var.subnet_ids
+  security_group_ids = [aws_security_group.opensearch.id]
+}
+
+# 4. Network Policy (Depends on VPCE)
 resource "aws_opensearchserverless_security_policy" "network" {
-  name = "${var.project_name}-aoss-net-${var.environment}"
-  type = "network"
-
+  name        = "${var.project_name}-network-${var.environment}"
+  type        = "network"
+  description = "Network policy for OpenSearch Serverless"
   policy = jsonencode([
     {
-      Rules = [{
-        ResourceType = "collection"
-        Resource     = ["collection/${var.project_name}-opensearch-${var.environment}"]
-      }]
-      AllowFromPublic = false
-      SourceVPCEs     = [aws_opensearchserverless_vpc_endpoint.main.id]
-    }
-  ])
-}
-
-############################
-# Collection
-############################
-resource "aws_opensearchserverless_collection" "main" {
-  name             = "${var.project_name}-opensearch-${var.environment}"
-  type             = "VECTORSEARCH"
-  standby_replicas = "ENABLED"
-
-  depends_on = [
-    aws_opensearchserverless_security_policy.encryption,
-    aws_opensearchserverless_security_policy.network
-  ]
-}
-
-############################
-# Data Access Policy
-############################
-resource "aws_opensearchserverless_access_policy" "data_access" {
-  name = "${var.project_name}-aoss-access-${var.environment}"
-  type = "data"
-
-  policy = jsonencode([
-    {
-      Principal = [
-        var.backend_service_role_arn,
-        var.ingestion_service_role_arn
-      ]
+      Description = "Private access via VPC Endpoint",
       Rules = [
         {
-          ResourceType = "collection"
-          Resource     = ["collection/${aws_opensearchserverless_collection.main.name}"]
-          Permission = [
-            "aoss:DescribeCollectionItems",
-            "aoss:CreateCollectionItems",
-            "aoss:UpdateCollectionItems",
-            "aoss:DeleteCollectionItems"
+          ResourceType = "collection",
+          Resource = [
+            "collection/${var.project_name}-os-${var.environment}"
           ]
         },
         {
-          ResourceType = "index"
-          Resource     = ["index/${aws_opensearchserverless_collection.main.name}/*"]
-          Permission = [
-            "aoss:CreateIndex",
-            "aoss:DeleteIndex",
-            "aoss:UpdateIndex",
-            "aoss:DescribeIndex",
-            "aoss:ReadDocument",
-            "aoss:WriteDocument"
+          ResourceType = "dashboard",
+          Resource = [
+            "collection/${var.project_name}-os-${var.environment}"
           ]
         }
+      ],
+      AllowFromPublic = false,
+      SourceVPCEs = [
+        aws_opensearchserverless_vpc_endpoint.main.id
       ]
     }
   ])
+
+  # Ensure endpoint is ready before applying policy referencing it
+  depends_on = [aws_opensearchserverless_vpc_endpoint.main]
 }
 
+# 5. Collection (Depends on Encryption Policy)
+resource "aws_opensearchserverless_collection" "main" {
+  name = "${var.project_name}-os-${var.environment}"
+  type = "VECTOR"
 
+  # Encryption policy must be applied first to matched collection name
+  depends_on = [
+    aws_opensearchserverless_security_policy.encryption
+  ]
+
+  tags = {
+    Name = "${var.project_name}-os-${var.environment}"
+  }
+}
+
+# Note: Access Policy has been moved to root main.tf to avoid dependency cycle with ECS roles.

@@ -264,10 +264,50 @@ module "opensearch" {
 
   # Allow both ingestion and backend ECS services
   ingestion_service_security_group_id = module.vpc.ecs_ingestion_security_group_id
-  ingestion_service_role_arn          = module.ecs_ingestion.task_role_arn
-
-  backend_service_security_group_id = module.vpc.ecs_backend_security_group_id
-  backend_service_role_arn          = module.ecs_backend.task_role_arn
+  backend_service_security_group_id   = module.vpc.ecs_backend_security_group_id
 
   # depends_on = [module.ecs_ingestion, module.ecs_backend]
+}
+
+# OpenSearch Access Policy (Defined here to avoid circular dependency with ECS)
+resource "aws_opensearchserverless_access_policy" "main" {
+  name        = "${var.project_name}-access-${var.environment}"
+  type        = "data"
+  description = "Access policy for OpenSearch Serverless"
+  policy = jsonencode([
+    {
+      Rules = [
+        {
+          ResourceType = "collection",
+          Resource = [
+            "collection/${module.opensearch.collection_name}"
+          ],
+          Permission = [
+            "aoss:CreateCollectionItems",
+            "aoss:DeleteCollectionItems",
+            "aoss:UpdateCollectionItems",
+            "aoss:DescribeCollectionItems"
+          ]
+        },
+        {
+          ResourceType = "index",
+          Resource = [
+            "index/${module.opensearch.collection_name}/*"
+          ],
+          Permission = [
+            "aoss:CreateIndex",
+            "aoss:DeleteIndex",
+            "aoss:UpdateIndex",
+            "aoss:DescribeIndex",
+            "aoss:ReadDocument",
+            "aoss:WriteDocument"
+          ]
+        }
+      ],
+      Principal = [
+        module.ecs_ingestion.task_role_arn,
+        module.ecs_backend.task_role_arn
+      ]
+    }
+  ])
 }

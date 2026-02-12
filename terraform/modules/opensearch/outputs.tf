@@ -8,6 +8,11 @@ output "collection_arn" {
   value       = aws_opensearchserverless_collection.main.arn
 }
 
+output "collection_name" {
+  description = "OpenSearch collection name"
+  value       = aws_opensearchserverless_collection.main.name
+}
+
 output "collection_endpoint" {
   description = "OpenSearch collection endpoint"
   value       = aws_opensearchserverless_collection.main.collection_endpoint
@@ -18,7 +23,7 @@ output "dashboard_endpoint" {
   value       = aws_opensearchserverless_collection.main.dashboard_endpoint
 }
 
-
 output "security_group_id" {
-  value = aws_security_group.aoss_endpoint.id
+  description = "OpenSearch security group ID"
+  value       = aws_security_group.opensearch.id
 }
