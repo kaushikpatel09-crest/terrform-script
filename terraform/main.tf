@@ -154,9 +154,9 @@ resource "aws_s3_bucket_notification" "landing_to_sqs" {
   bucket = module.s3_buckets.landing_bucket_name
 
   queue {
-    queue_arn     = module.sqs_landing.queue_arn
-    events        = ["s3:ObjectCreated:*"]
-    filter_suffix = ".json" # Example filter, can be removed or adjusted
+    queue_arn = module.sqs_landing.queue_arn
+    events    = ["s3:ObjectCreated:*"]
+    # filter_suffix = ".json" # Example filter, can be removed or adjusted
   }
 
   depends_on = [module.sqs_landing]
