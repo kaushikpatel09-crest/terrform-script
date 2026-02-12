@@ -112,14 +112,16 @@ resource "aws_opensearchserverless_security_policy" "network" {
   name = "${var.project_name}-aoss-net-${var.environment}"
   type = "network"
 
-  policy = jsonencode({
-    Rules = [{
-      ResourceType = "collection"
-      Resource     = ["collection/${var.project_name}-opensearch-${var.environment}"]
-    }]
-    AllowFromPublic = false
-    SourceVPCEs     = [aws_opensearchserverless_vpc_endpoint.main.id]
-  })
+  policy = jsonencode([
+    {
+      Rules = [{
+        ResourceType = "collection"
+        Resource     = ["collection/${var.project_name}-opensearch-${var.environment}"]
+      }]
+      AllowFromPublic = false
+      SourceVPCEs     = [aws_opensearchserverless_vpc_endpoint.main.id]
+    }
+  ])
 }
 
 # OpenSearch VPC endpoint for private access
