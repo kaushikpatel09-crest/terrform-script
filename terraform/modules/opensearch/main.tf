@@ -22,14 +22,17 @@ resource "aws_opensearchserverless_security_policy" "encryption" {
   })
 }
 
-# OpenSearch Serverless collection with standby replicas
+# OpenSearch Serverless VECTOR collection with standby replicas
 resource "aws_opensearchserverless_collection" "main" {
   name             = "${var.project_name}-opensearch-${var.environment}"
-  type             = "SEARCH"
+  type             = "VECTORSEARCH"
   standby_replicas = "ENABLED"
 
-  # Ensure encryption policy exists first
-  depends_on = [aws_opensearchserverless_security_policy.encryption]
+  # Ensure encryption and network policies exist first
+  depends_on = [
+    aws_opensearchserverless_security_policy.encryption,
+    aws_opensearchserverless_security_policy.network
+  ]
 
   tags = {
     Name = "${var.project_name}-opensearch-${var.environment}"
@@ -102,6 +105,21 @@ resource "aws_opensearchserverless_access_policy" "main" {
       ]
     }
   ])
+}
+
+# Network security policy - private access via VPC endpoint only
+resource "aws_opensearchserverless_security_policy" "network" {
+  name = "${var.project_name}-aoss-net-${var.environment}"
+  type = "network"
+
+  policy = jsonencode({
+    Rules = [{
+      ResourceType = "collection"
+      Resource     = ["collection/${var.project_name}-opensearch-${var.environment}"]
+    }]
+    AllowFromPublic = false
+    SourceVPCEs     = [aws_opensearchserverless_vpc_endpoint.main.id]
+  })
 }
 
 # OpenSearch VPC endpoint for private access
