@@ -132,7 +132,7 @@ module "ecs_backend" {
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
   depends_on = [module.vpc, module.internal_alb]
-    environment_variables = {
+  environment_variables = {
     OPENSEARCH_ENDPOINT = module.opensearch.collection_endpoint
   }
 
@@ -169,7 +169,7 @@ module "ecs_ingestion" {
   bedrock_model_arn  = var.bedrock_model_arn
   ecr_repository_arn = var.ingestion_ecr_repository_arn
   depends_on         = [module.vpc, module.s3_buckets]
-    environment_variables = {
+  environment_variables = {
     OPENSEARCH_ENDPOINT = module.opensearch.collection_endpoint
   }
 
@@ -269,5 +269,5 @@ module "opensearch" {
   backend_service_security_group_id = module.vpc.ecs_backend_security_group_id
   backend_service_role_arn          = module.ecs_backend.task_role_arn
 
- # depends_on = [module.ecs_ingestion, module.ecs_backend]
+  # depends_on = [module.ecs_ingestion, module.ecs_backend]
 }
