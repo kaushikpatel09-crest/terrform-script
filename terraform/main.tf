@@ -192,6 +192,7 @@ module "ecs_ingestion" {
   bedrock_model_arn  = var.bedrock_model_arn
   ecr_repository_arn = var.ingestion_ecr_repository_arn
   sqs_queue_arn      = module.sqs_landing.queue_arn
+  enable_sqs_access  = true
 
   depends_on = [module.vpc, module.s3_buckets, module.sqs_landing]
 

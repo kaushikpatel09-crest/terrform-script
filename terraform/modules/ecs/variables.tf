@@ -121,6 +121,12 @@ variable "sqs_queue_arn" {
   default     = ""
 }
 
+variable "enable_sqs_access" {
+  type        = bool
+  description = "Enable SQS queue access permissions"
+  default     = false
+}
+
 variable "environment_variables" {
   type        = map(string)
   description = "(Optional) Map of environment variables to set in the container. Example: { BE_BASE_URL = 'https://api.example.com' }"

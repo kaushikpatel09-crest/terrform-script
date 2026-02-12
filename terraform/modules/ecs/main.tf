@@ -305,7 +305,7 @@ resource "aws_iam_role_policy" "ecs_s3_access" {
 
 # Optional inline policy granting SQS queue access
 resource "aws_iam_role_policy" "ecs_sqs_access" {
-  count = var.sqs_queue_arn != "" ? 1 : 0
+  count = var.enable_sqs_access ? 1 : 0
 
   name = "${var.project_name}-ecs-sqs-access-${var.service_name}-${var.environment}"
   role = aws_iam_role.ecs_task_role.id
