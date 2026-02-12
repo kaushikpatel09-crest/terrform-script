@@ -109,7 +109,7 @@ resource "aws_opensearchserverless_security_policy" "network" {
 # 5. Collection (Depends on Encryption Policy)
 resource "aws_opensearchserverless_collection" "main" {
   name = "${var.project_name}-os-${var.environment}"
-  type = "VECTOR"
+  type = "VECTORSEARCH"
 
   # Encryption policy must be applied first to matched collection name
   depends_on = [
