@@ -245,9 +245,15 @@ resource "aws_iam_role_policy" "ecs_bedrock_invoke" {
         Effect = "Allow",
         Action = [
           "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
+          "bedrock:InvokeModelWithResponseStream",
+          "bedrock:StartAsyncInvoke",
+          "bedrock:GetAsyncInvoke",
+          "bedrock:ListAsyncInvokes"
         ],
-        Resource = var.bedrock_model_arn
+        Resource = [
+          var.bedrock_model_arn,
+          "arn:aws:bedrock:us-east-1:943143228843:async-invoke/*"
+        ]
       }
     ]
   })
