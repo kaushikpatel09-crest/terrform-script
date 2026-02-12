@@ -245,18 +245,21 @@ module "s3_buckets" {
   project_name = var.project_name
 }
 
+# OpenSearch Serverless Module (with standby replicas)
+module "opensearch" {
+  source = "./modules/opensearch"
 
+  environment  = var.environment
+  project_name = var.project_name
+  vpc_id       = module.vpc.vpc_id
+  subnet_ids   = module.vpc.private_subnet_ids
 
-# #OpenSearch Module
-#module "opensearch" {
-#  source = "./modules/opensearch"
+  # Allow both ingestion and backend ECS services
+  ingestion_service_security_group_id = module.vpc.ecs_ingestion_security_group_id
+  ingestion_service_role_arn          = module.ecs_ingestion.task_role_arn
 
-#  environment                         = var.environment
-#  project_name                        = var.project_name
-#  vpc_id                              = module.vpc.vpc_id
-#  subnet_ids                          = module.vpc.private_subnet_ids
-#  ingestion_service_security_group_id = module.vpc.ecs_backend_security_group_id
-#  ingestion_service_role_arn          = module.ecs_ingestion.task_role_arn
+  backend_service_security_group_id = module.vpc.ecs_backend_security_group_id
+  backend_service_role_arn          = module.ecs_backend.task_role_arn
 
-#  depends_on = [module.ecs_ingestion]
-#}
+  depends_on = [module.ecs_ingestion, module.ecs_backend]
+}

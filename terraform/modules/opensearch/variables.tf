@@ -27,3 +27,13 @@ variable "ingestion_service_role_arn" {
   type        = string
   description = "IAM role ARN of the Ingestion ECS service"
 }
+
+variable "backend_service_security_group_id" {
+  type        = string
+  description = "Security group ID of the Backend ECS service"
+}
+
+variable "backend_service_role_arn" {
+  type        = string
+  description = "IAM role ARN of the Backend ECS service"
+}

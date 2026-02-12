@@ -7,10 +7,12 @@ terraform {
   }
 }
 
-# OpenSearch Domain with standby
+# OpenSearch Serverless collection with standby replicas
 resource "aws_opensearchserverless_collection" "main" {
-  name = "${var.project_name}-opensearch-${var.environment}"
-  type = "SEARCH"
+  name   = "${var.project_name}-opensearch-${var.environment}"
+  type   = "SEARCH"
+  # Enable standby replicas for higher availability
+  standby_replicas = "ENABLED"
 
   tags = {
     Name = "${var.project_name}-opensearch-${var.environment}"
@@ -27,8 +29,11 @@ resource "aws_security_group" "opensearch" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [var.ingestion_service_security_group_id]
-    description     = "Allow HTTPS from Ingestion ECS service"
+    security_groups = [
+      var.ingestion_service_security_group_id,
+      var.backend_service_security_group_id
+    ]
+    description = "Allow HTTPS from Ingestion and Backend ECS services"
   }
 
   egress {
@@ -43,7 +48,7 @@ resource "aws_security_group" "opensearch" {
   }
 }
 
-# OpenSearch access policy
+# OpenSearch access policy for ECS ingestion and backend
 resource "aws_opensearchserverless_access_policy" "main" {
   name        = "${var.project_name}-opensearch-access-${var.environment}"
   type        = "data"
@@ -60,7 +65,10 @@ resource "aws_opensearchserverless_access_policy" "main" {
             "aoss:UpdateCollectionItems",
             "aoss:DescribeCollectionItems"
           ]
-          Principal = [var.ingestion_service_role_arn]
+          Principal = [
+            var.ingestion_service_role_arn,
+            var.backend_service_role_arn
+          ]
         },
         {
           ResourceType = "index"
@@ -73,7 +81,10 @@ resource "aws_opensearchserverless_access_policy" "main" {
             "aoss:ReadDocument",
             "aoss:WriteDocument"
           ]
-          Principal = [var.ingestion_service_role_arn]
+          Principal = [
+            var.ingestion_service_role_arn,
+            var.backend_service_role_arn
+          ]
         }
       ]
     }
