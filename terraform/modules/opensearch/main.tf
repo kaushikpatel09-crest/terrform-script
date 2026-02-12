@@ -82,10 +82,6 @@ resource "aws_opensearchserverless_access_policy" "main" {
             "aoss:UpdateCollectionItems",
             "aoss:DescribeCollectionItems"
           ]
-          Principal = [
-            var.ingestion_service_role_arn,
-            var.backend_service_role_arn
-          ]
         },
         {
           ResourceType = "index"
@@ -98,11 +94,11 @@ resource "aws_opensearchserverless_access_policy" "main" {
             "aoss:ReadDocument",
             "aoss:WriteDocument"
           ]
-          Principal = [
-            var.ingestion_service_role_arn,
-            var.backend_service_role_arn
-          ]
         }
+      ]
+      Principal = [
+        var.ingestion_service_role_arn,
+        var.backend_service_role_arn
       ]
     }
   ])
