@@ -9,7 +9,8 @@ terraform {
 
 # Encryption policy required for the collection
 resource "aws_opensearchserverless_security_policy" "encryption" {
-  name = "${var.project_name}-opensearch-encryption-${var.environment}"
+  # Name must be 3–32 characters
+  name = "${var.project_name}-aoss-enc-${var.environment}"
   type = "encryption"
 
   policy = jsonencode({
