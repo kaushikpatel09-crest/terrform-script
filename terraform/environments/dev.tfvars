@@ -75,3 +75,9 @@ OPENSEARCH_INDEX_NAME = "video_clips_3_faiss_per_modality"
 EMBEDDING_MODEL_NAME  = "us.twelvelabs.marengo-embed-3-0-v1:0"
 S3_BUCKET_OWNER_ID    = "943143228843"
 S3_BUCKET_NAME        = "conde-nast-image-search-dev"
+
+
+DB_NAME           = "video_search"
+JOBS_COLLECTION   = "video_ingestion_jobs"
+ERRORS_COLLECTION = "video_pipeline_errors"
+SEARCH_COLLECTION = "video_search_logs"

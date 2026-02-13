@@ -140,6 +140,11 @@ module "ecs_backend" {
     EMBEDDING_MODEL_NAME  = var.embedding_model_name
     S3_BUCKET_OWNER_ID    = var.s3_bucket_owner_id
     S3_BUCKET_NAME        = var.s3_bucket_name
+    DOCUMENTDB_URI        = module.documentdb.documentdb_uri
+    DB_NAME               = var.db_name
+    JOBS_COLLECTION       = var.jobs_collection
+    ERRORS_COLLECTION     = var.errors_collection
+    SEARCH_COLLECTION     = var.search_collection
   }
 
 
@@ -219,6 +224,11 @@ module "ecs_ingestion" {
     POLL_INTERVAL_SECONDS  = var.ingestion_poll_interval_seconds
     PROCESSED_BUCKET       = var.ingestion_processed_bucket
     AWS_BUCKET_OWNER       = var.ingestion_aws_bucket_owner
+    DOCUMENTDB_URI         = module.documentdb.documentdb_uri
+    DB_NAME                = var.db_name
+    JOBS_COLLECTION        = var.jobs_collection
+    ERRORS_COLLECTION      = var.errors_collection
+    SEARCH_COLLECTION      = var.search_collection
 
 
   }
