@@ -9,8 +9,9 @@ terraform {
 
 # DocumentDB Subnet Group
 resource "aws_docdb_subnet_group" "main" {
-  name_prefix = "${var.project_name}-"
-  subnet_ids  = var.subnet_ids
+  #  name_prefix = "${var.project_name}-"
+  name       = "${var.project_name}-docdb-subnet-group-${var.environment}"
+  subnet_ids = var.subnet_ids
 
   tags = {
     Name = "${var.project_name}-docdb-subnet-group-${var.environment}"
@@ -42,7 +43,8 @@ resource "aws_docdb_cluster" "main" {
 
 # DocumentDB Cluster Parameter Group
 resource "aws_docdb_cluster_parameter_group" "main" {
-  name_prefix = "${var.project_name}-"
+  #  name_prefix = "${var.project_name}-"
+  name        = "${var.project_name}-docdb-cluster-pg-${var.environment}"
   family      = "docdb4.0"
   description = "Parameter group for ${var.cluster_identifier}"
 
