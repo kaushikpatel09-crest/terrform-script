@@ -95,7 +95,7 @@ resource "aws_opensearchserverless_security_policy" "network" {
           ]
         }
       ],
-      AllowFromPublic = true,
+      AllowFromPublic = false,
       SourceVPCEs = [
         aws_opensearchserverless_vpc_endpoint.main.id
       ]
@@ -103,7 +103,7 @@ resource "aws_opensearchserverless_security_policy" "network" {
   ])
 
   # Ensure endpoint is ready before applying policy referencing it
-  depends_on = [aws_opensearchserverless_vpc_endpoint.main]
+  depends_on = [aws_opensearchserverless_vpc_endpoint.main, aws_opensearchserverless_collection.main]
 }
 
 # 5. Collection (Depends on Encryption Policy)
