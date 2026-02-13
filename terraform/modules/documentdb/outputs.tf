@@ -30,3 +30,9 @@ output "master_username" {
   value       = aws_docdb_cluster.main.master_username
   sensitive   = true
 }
+
+output "documentdb_uri" {
+  description = "Connection URI for DocumentDB"
+  value       = "mongodb://${aws_docdb_cluster.main.master_username}:${var.master_password}@${aws_docdb_cluster.main.endpoint}:${aws_docdb_cluster.main.port}/?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
+  sensitive   = true
+}
