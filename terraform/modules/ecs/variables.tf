@@ -132,3 +132,9 @@ variable "environment_variables" {
   description = "(Optional) Map of environment variables to set in the container. Example: { BE_BASE_URL = 'https://api.example.com' }"
   default     = {}
 }
+
+variable "enable_ecs_opensearch_access" {
+  type        = bool
+  description = "Enable OpenSearch access for this ECS service"
+  default     = true
+}

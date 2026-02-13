@@ -334,3 +334,25 @@ resource "aws_iam_role_policy" "ecs_sqs_access" {
 
 # Data source to get current AWS region
 data "aws_region" "current" {}
+
+
+# OpenSearch access from ecs ingestion service
+resource "aws_iam_role_policy" "ecs_opensearch_access" {
+  count = var.enable_ecs_opensearch_access ? 1 : 0
+
+  name = "${var.project_name}-ecs-aoss-access-${var.service_name}-${var.environment}"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "aoss:APIAccessAll"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
