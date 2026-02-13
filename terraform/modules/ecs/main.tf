@@ -325,7 +325,8 @@ resource "aws_iam_role_policy" "ecs_sqs_access" {
         Action = [
           "sqs:ReceiveMessage",
           "sqs:DeleteMessage",
-          "sqs:GetQueueAttributes"
+          "sqs:GetQueueAttributes",
+          "sqs:changemessagevisibility"
         ],
         Resource = var.sqs_queue_arn
       }
