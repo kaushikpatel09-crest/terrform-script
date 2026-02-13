@@ -16,6 +16,10 @@ resource "aws_docdb_subnet_group" "main" {
   tags = {
     Name = "${var.project_name}-docdb-subnet-group-${var.environment}"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # DocumentDB Cluster
@@ -55,6 +59,10 @@ resource "aws_docdb_cluster_parameter_group" "main" {
 
   tags = {
     Name = "${var.project_name}-docdb-cluster-pg-${var.environment}"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
