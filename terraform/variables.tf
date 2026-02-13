@@ -362,3 +362,27 @@ variable "s3_bucket_name" {
   description = "S3 bucket name"
   default     = ""
 }
+
+variable "db_name" {
+  type        = string
+  description = "DocumentDB database name"
+  default     = ""
+}
+
+variable "jobs_collection" {
+  type        = string
+  description = "DocumentDB jobs collection name"
+  default     = ""
+}
+
+variable "errors_collection" {
+  type        = string
+  description = "DocumentDB errors collection name"
+  default     = ""
+}
+
+variable "search_collection" {
+  type        = string
+  description = "DocumentDB search collection name"
+  default     = ""
+}
