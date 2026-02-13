@@ -80,18 +80,6 @@ jobs:
             -var-file="environments/${{ env.ENVIRONMENT }}.tfvars" \
             -var="documentdb_master_password=${{ secrets.DOCUMENTDB_PASSWORD }}" \
             -var="backend_base_url=${{ secrets.BACKEND_BASE_URL }}" \
-            -var="ingestion_sqs_visibility_timeout=${{ secrets.INGESTION_SQS_VISIBILITY_TIMEOUT }}" \
-            -var="ingestion_sqs_wait_time_seconds=${{ secrets.INGESTION_SQS_WAIT_TIME_SECONDS }}" \
-            -var="ingestion_sqs_heartbeat_interval=${{ secrets.INGESTION_SQS_HEARTBEAT_INTERVAL }}" \
-            -var="ingestion_sqs_max_messages=${{ secrets.INGESTION_SQS_MAX_MESSAGES }}" \
-            -var="ingestion_concurrency=${{ secrets.INGESTION_CONCURRENCY }}" \
-            -var="ingestion_index_name=${{ secrets.INGESTION_INDEX_NAME }}-${{ env.ENVIRONMENT }}" \
-            -var="ingestion_max_size_gb=${{ secrets.INGESTION_MAX_SIZE_GB }}" \
-            -var="ingestion_max_duration_minutes=${{ secrets.INGESTION_MAX_DURATION_MINUTES }}" \
-            -var="ingestion_max_wait_time_seconds=${{ secrets.INGESTION_MAX_WAIT_TIME_SECONDS }}" \
-            -var="ingestion_poll_interval_seconds=${{ secrets.INGESTION_POLL_INTERVAL_SECONDS }}" \
-            -var="ingestion_processed_bucket=${{ secrets.INGESTION_PROCESSED_BUCKET }}-${{ env.ENVIRONMENT }}" \
-            -var="ingestion_aws_bucket_owner=${{ secrets.INGESTION_AWS_BUCKET_OWNER }}" \
             -out=tfplan \
             -no-color
 
