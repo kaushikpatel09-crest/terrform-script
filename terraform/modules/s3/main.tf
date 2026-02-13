@@ -130,7 +130,7 @@ resource "aws_s3_bucket_public_access_block" "processed" {
 
 
 # S3 Bucket - image-search
-resource "aws_s3_bucket" "landing" {
+resource "aws_s3_bucket" "imagesearch" {
   bucket = "${var.project_name}-image-search-${var.environment}"
 
   tags = {
