@@ -252,8 +252,8 @@ resource "aws_iam_role_policy" "ecs_bedrock_invoke" {
         ],
         Resource = [
           var.bedrock_model_arn,
-          "arn:aws:bedrock:us-east-1:943143228843:async-invoke/*",
-          "arn:aws:bedrock:us-east-1::foundation-model/twelvelabs.marengo-embed-3-0-v1:0"
+          "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:async-invoke/*",
+          "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/twelvelabs.marengo-embed-3-0-v1:0"
         ]
       }
     ]
@@ -336,6 +336,9 @@ resource "aws_iam_role_policy" "ecs_sqs_access" {
 
 # Data source to get current AWS region
 data "aws_region" "current" {}
+
+# Data source to get current AWS account ID
+data "aws_caller_identity" "current" {}
 
 
 # OpenSearch access from ecs ingestion service
