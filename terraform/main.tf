@@ -139,10 +139,9 @@ module "ecs_backend" {
     OPENSEARCH_INDEX_NAME = var.opensearch_index_name
     EMBEDDING_MODEL_NAME  = var.embedding_model_name
     S3_BUCKET_OWNER_ID    = var.s3_bucket_owner_id
-    S3_BUCKET_NAME        = var.s3_bucket_name
+    IMAGE_SEARCH_BUCKET   = var.s3_bucket_name
     DOCUMENTDB_URI        = module.documentdb.documentdb_uri
     DB_NAME               = var.db_name
-    JOBS_COLLECTION       = var.jobs_collection
     ERRORS_COLLECTION     = var.errors_collection
     SEARCH_COLLECTION     = var.search_collection
   }
@@ -240,7 +239,7 @@ module "documentdb" {
 
   environment           = var.environment
   project_name          = var.project_name
-  cluster_identifier    = "${var.project_name}-docdb-${var.environment}"
+  cluster_identifier    = "${var.project_name}-docdb-${var.environment}-v3"
   engine_version        = var.documentdb_engine_version
   master_username       = var.documentdb_master_username
   master_password       = var.documentdb_master_password
@@ -365,8 +364,11 @@ resource "aws_opensearchserverless_access_policy" "main" {
       ],
       Principal = [
         module.ecs_ingestion.task_role_arn,
-        module.ecs_backend.task_role_arn
+        module.ecs_backend.task_role_arn,
+        data.aws_caller_identity.current.arn
       ]
     }
   ])
 }
+
+data "aws_caller_identity" "current" {}

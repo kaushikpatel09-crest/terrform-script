@@ -264,19 +264,6 @@ resource "aws_security_group" "documentdb" {
   description = "Security group for DocumentDB"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    from_port       = 27017
-    to_port         = 27017
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_backend.id]
-  }
-  ingress {
-    from_port       = 27017
-    to_port         = 27017
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_ingestion.id]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -287,6 +274,36 @@ resource "aws_security_group" "documentdb" {
   tags = {
     Name = "${var.project_name}-documentdb-sg-${var.environment}"
   }
+}
+
+resource "aws_security_group_rule" "docdb_ingress_backend" {
+  type                     = "ingress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.documentdb.id
+  source_security_group_id = aws_security_group.ecs_backend.id
+  description              = "Allow DocumentDB access from Backend ECS service"
+}
+
+resource "aws_security_group_rule" "docdb_ingress_ingestion" {
+  type                     = "ingress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.documentdb.id
+  source_security_group_id = aws_security_group.ecs_ingestion.id
+  description              = "Allow DocumentDB access from Ingestion ECS service"
+}
+
+resource "aws_security_group_rule" "docdb_ingress_vpc" {
+  type              = "ingress"
+  from_port         = 27017
+  to_port           = 27017
+  protocol          = "tcp"
+  security_group_id = aws_security_group.documentdb.id
+  cidr_blocks       = [aws_vpc.main.cidr_block]
+  description       = "Allow DocumentDB access from within the VPC CIDR"
 }
 
 # VPC Flow Logs (optional but recommended)
