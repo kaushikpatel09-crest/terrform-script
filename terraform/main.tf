@@ -94,7 +94,7 @@ module "ecs_frontend" {
   ecr_repository_arn = var.frontend_ecr_repository_arn
 
   environment_variables = {
-    BE_BASE_URL = var.backend_base_url
+    VITE_BE_BASE_URL = var.backend_base_url
   }
 
   load_balancer_target_group_arn = module.external_alb.target_group_arn
