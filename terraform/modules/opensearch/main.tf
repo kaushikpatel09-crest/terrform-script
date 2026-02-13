@@ -87,6 +87,21 @@ resource "aws_opensearchserverless_security_policy" "network" {
           Resource = [
             "collection/${var.project_name}-os-${var.environment}"
           ]
+        }
+      ],
+      AllowFromPublic = false,
+      SourceVPCEs = [
+        aws_opensearchserverless_vpc_endpoint.main.id
+      ]
+    },
+    {
+      Description = "Public access to Collection and Dashboard (for developers)",
+      Rules = [
+        {
+          ResourceType = "collection",
+          Resource = [
+            "collection/${var.project_name}-os-${var.environment}"
+          ]
         },
         {
           ResourceType = "dashboard",
@@ -95,10 +110,7 @@ resource "aws_opensearchserverless_security_policy" "network" {
           ]
         }
       ],
-      AllowFromPublic = true,
-      SourceVPCEs = [
-        aws_opensearchserverless_vpc_endpoint.main.id
-      ]
+      AllowFromPublic = true
     }
   ])
 
