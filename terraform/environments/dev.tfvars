@@ -59,12 +59,12 @@ ingestion_sqs_max_messages       = 1
 
 # Ingestion Settings
 ingestion_concurrency           = 1
-ingestion_index_name            = "video-index-${var.environment}"
+ingestion_index_name            = "video-index-dev"
 ingestion_max_size_gb           = 6
 ingestion_max_duration_minutes  = 240
 ingestion_max_wait_time_seconds = 3600
 ingestion_poll_interval_seconds = 30
 
 # Buckets
-ingestion_processed_bucket = "processed-bucket-${var.environment}"
-ingestion_aws_bucket_owner = "123456789012"
+ingestion_processed_bucket = "processed-bucket-dev"
+ingestion_aws_bucket_owner = "943143228843"
