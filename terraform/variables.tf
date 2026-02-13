@@ -260,3 +260,75 @@ variable "ingestion_ecr_repository_arn" {
   description = "(Optional) ARN of ECR repository for image access"
   default     = ""
 }
+
+variable "ingestion_sqs_visibility_timeout" {
+  type        = number
+  description = "Visibility timeout for SQS queue"
+  default     = 300
+}
+
+variable "ingestion_sqs_wait_time_seconds" {
+  type        = number
+  description = "Wait time for SQS queue"
+  default     = 20
+}
+
+variable "ingestion_sqs_heartbeat_interval" {
+  type        = number
+  description = "Heartbeat interval for SQS queue"
+  default     = 120
+}
+
+variable "ingestion_sqs_max_messages" {
+  type        = number
+  description = "Maximum number of messages for SQS queue"
+  default     = 1
+}
+
+variable "ingestion_concurrency" {
+  type        = number
+  description = "Number of concurrent ingestion tasks"
+  default     = 1
+}
+
+variable "ingestion_index_name" {
+  type        = string
+  description = "Name of the index to use"
+  default     = ""
+}
+
+variable "ingestion_max_size_gb" {
+  type        = number
+  description = "Maximum size of the index in GB"
+  default     = 6
+}
+
+variable "ingestion_max_duration_minutes" {
+  type        = number
+  description = "Maximum duration of the index in minutes"
+  default     = 240
+}
+
+variable "ingestion_max_wait_time_seconds" {
+  type        = number
+  description = "Maximum wait time for the index in seconds"
+  default     = 3600
+}
+
+variable "ingestion_poll_interval_seconds" {
+  type        = number
+  description = "Poll interval for the index in seconds"
+  default     = 30
+}
+
+variable "ingestion_processed_bucket" {
+  type        = string
+  description = "Bucket to store processed files"
+  default     = ""
+}
+
+variable "ingestion_aws_bucket_owner" {
+  type        = string
+  description = "AWS bucket owner"
+  default     = ""
+}
