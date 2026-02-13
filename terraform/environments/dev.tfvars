@@ -66,5 +66,5 @@ ingestion_max_wait_time_seconds = 3600
 ingestion_poll_interval_seconds = 30
 
 # Buckets
-ingestion_processed_bucket = "conde-nast-landing-events-dev"
+ingestion_processed_bucket = "conde-nast-landing-dev"
 ingestion_aws_bucket_owner = "943143228843"
