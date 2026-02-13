@@ -79,7 +79,7 @@ jobs:
           terraform plan \
             -var-file="environments/${{ env.ENVIRONMENT }}.tfvars" \
             -var="documentdb_master_password=${{ secrets.DOCUMENTDB_PASSWORD }}" \
-            -var="backend_base_url=${{ secrets.BACKEND_BASE_URL }}" \
+            -var="backend_base_url=${{ secrets.VITE_BE_BASE_URL }}" \
             -out=tfplan \
             -no-color
 
@@ -119,7 +119,7 @@ jobs:
           terraform destroy \
             -var-file="environments/${{ env.ENVIRONMENT }}.tfvars" \
             -var="documentdb_master_password=${{ secrets.DOCUMENTDB_PASSWORD }}" \
-            -var="backend_base_url=${{ secrets.BACKEND_BASE_URL }}" \
+            -var="backend_base_url=${{ secrets.VITE_BE_BASE_URL }}" \
             -auto-approve
 
       - name: Output Terraform Outputs
