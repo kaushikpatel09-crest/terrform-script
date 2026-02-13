@@ -133,7 +133,13 @@ module "ecs_backend" {
 
   depends_on = [module.vpc, module.internal_alb]
   environment_variables = {
-    OPENSEARCH_ENDPOINT = module.opensearch.collection_endpoint
+    OPENSEARCH_ENDPOINT   = module.opensearch.collection_endpoint
+    OPENSEARCH_REGION     = var.aws_region
+    OPENSEARCH_SERVICE    = var.opensearch_service
+    OPENSEARCH_INDEX_NAME = var.opensearch_index_name
+    EMBEDDING_MODEL_NAME  = var.embedding_model_name
+    S3_BUCKET_OWNER_ID    = var.s3_bucket_owner_id
+    S3_BUCKET_NAME        = var.s3_bucket_name
   }
 
 

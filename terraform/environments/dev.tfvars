@@ -68,3 +68,10 @@ ingestion_poll_interval_seconds = 30
 # Buckets
 ingestion_processed_bucket = "conde-nast-landing-dev"
 ingestion_aws_bucket_owner = "943143228843"
+
+
+OPENSEARCH_SERVICE    = "aoss"
+OPENSEARCH_INDEX_NAME = "video_clips_3_faiss_per_modality"
+EMBEDDING_MODEL_NAME  = "us.twelvelabs.marengo-embed-3-0-v1:0"
+S3_BUCKET_OWNER_ID    = "943143228843"
+S3_BUCKET_NAME        = "conde-nast-image-search-dev"

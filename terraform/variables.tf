@@ -332,3 +332,33 @@ variable "ingestion_aws_bucket_owner" {
   description = "AWS bucket owner"
   default     = ""
 }
+
+variable "opensearch_service" {
+  type        = string
+  description = "OpenSearch service"
+  default     = ""
+}
+
+variable "opensearch_index_name" {
+  type        = string
+  description = "OpenSearch index name"
+  default     = ""
+}
+
+variable "embedding_model_name" {
+  type        = string
+  description = "Embedding model name"
+  default     = ""
+}
+
+variable "s3_bucket_owner_id" {
+  type        = string
+  description = "S3 bucket owner ID"
+  default     = ""
+}
+
+variable "s3_bucket_name" {
+  type        = string
+  description = "S3 bucket name"
+  default     = ""
+}
