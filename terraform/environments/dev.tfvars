@@ -38,14 +38,14 @@ documentdb_instance_class        = "db.t3.medium"
 documentdb_skip_final_snapshot   = true
 
 # ECS Ingestion Backend Service Configuration
-ingestion_image              = "your-ingestion-image" # Update with your ingestion service image
+ingestion_image              = "943143228843.dkr.ecr.us-east-1.amazonaws.com/conde-nast-ingestion-dev" # Update with your ingestion service image
 ingestion_image_tag          = "latest"
 ingestion_task_cpu           = 256
 ingestion_task_memory        = 512
 ingestion_desired_count      = 1
 ingestion_min_capacity       = 1
 ingestion_max_capacity       = 2
-ingestion_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/your-repo" # Update with your ECR repo ARN
+ingestion_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-ingestion-dev" # Update with your ECR repo ARN
 
 # Load Balancer Configuration
 enable_https    = false
@@ -66,5 +66,5 @@ ingestion_max_wait_time_seconds = 3600
 ingestion_poll_interval_seconds = 30
 
 # Buckets
-ingestion_processed_bucket = "processed-bucket-dev"
+ingestion_processed_bucket = "conde-nast-landing-events-dev"
 ingestion_aws_bucket_owner = "943143228843"

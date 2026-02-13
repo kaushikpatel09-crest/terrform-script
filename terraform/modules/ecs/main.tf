@@ -252,7 +252,8 @@ resource "aws_iam_role_policy" "ecs_bedrock_invoke" {
         ],
         Resource = [
           var.bedrock_model_arn,
-          "arn:aws:bedrock:us-east-1:943143228843:async-invoke/*"
+          "arn:aws:bedrock:us-east-1:943143228843:async-invoke/*",
+          "arn:aws:bedrock:us-east-1::foundation-model/twelvelabs.marengo-embed-3-0-v1:0"
         ]
       }
     ]
