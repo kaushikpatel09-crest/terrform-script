@@ -321,11 +321,11 @@ variable "ingestion_poll_interval_seconds" {
   default     = 30
 }
 
-variable "ingestion_processed_bucket" {
-  type        = string
-  description = "Bucket to store processed files"
-  default     = ""
-}
+#variable "ingestion_processed_bucket" {
+#  type        = string
+#  description = "Bucket to store processed files"
+#  default     = ""
+#}
 
 variable "ingestion_aws_bucket_owner" {
   type        = string
@@ -357,11 +357,11 @@ variable "s3_bucket_owner_id" {
   default     = ""
 }
 
-variable "s3_bucket_name" {
-  type        = string
-  description = "S3 bucket name"
-  default     = ""
-}
+#variable "s3_bucket_name" {
+#  type        = string
+#  description = "S3 bucket name"
+#  default     = ""
+#}
 
 variable "db_name" {
   type        = string
