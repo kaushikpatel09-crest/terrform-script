@@ -91,7 +91,8 @@ module "ecs_frontend" {
   container_image_tag = var.frontend_image_tag
   log_group_name      = "/ecs/${var.project_name}-fe-${var.environment}"
 
-  ecr_repository_arn = var.frontend_ecr_repository_arn
+  #ecr_repository_arn = var.frontend_ecr_repository_arn
+  ecr_repository_arn = module.ecr_frontend.repository_arn
 
   environment_variables = {
     VITE_BE_BASE_URL = var.backend_base_url
@@ -127,7 +128,8 @@ module "ecs_backend" {
   log_group_name      = "/ecs/${var.project_name}-be-${var.environment}"
   bedrock_model_arn   = var.bedrock_model_arn
 
-  ecr_repository_arn = var.backend_ecr_repository_arn
+  #ecr_repository_arn = var.backend_ecr_repository_arn
+  ecr_repository_arn = module.ecr_backend.repository_arn
 
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
@@ -138,7 +140,7 @@ module "ecs_backend" {
     OPENSEARCH_SERVICE    = var.opensearch_service
     OPENSEARCH_INDEX_NAME = var.opensearch_index_name
     EMBEDDING_MODEL_NAME  = var.embedding_model_name
-    S3_BUCKET_OWNER_ID    = var.s3_bucket_owner_id
+    S3_BUCKET_OWNER_ID    = data.aws_caller_identity.current.account_id
     IMAGE_SEARCH_BUCKET   = module.s3_buckets.image_search_bucket_name
     DOCUMENTDB_URI        = module.documentdb.documentdb_uri
     DB_NAME               = var.db_name
@@ -200,7 +202,8 @@ module "ecs_ingestion" {
   enable_s3_access             = true
   s3_bucket_arns               = module.s3_buckets.all_bucket_arns
   bedrock_model_arn            = var.bedrock_model_arn
-  ecr_repository_arn           = var.ingestion_ecr_repository_arn
+ # ecr_repository_arn           = var.ingestion_ecr_repository_arn
+  ecr_repository_arn           = module.ecr_ingestion.repository_arn
   sqs_queue_arn                = module.sqs_landing.queue_arn
   enable_sqs_access            = true
   enable_ecs_opensearch_access = true
@@ -222,7 +225,7 @@ module "ecs_ingestion" {
     MAX_WAIT_TIME_SECONDS  = var.ingestion_max_wait_time_seconds
     POLL_INTERVAL_SECONDS  = var.ingestion_poll_interval_seconds
     PROCESSED_BUCKET       = module.s3_buckets.landing_bucket_name
-    AWS_BUCKET_OWNER       = var.ingestion_aws_bucket_owner
+    AWS_BUCKET_OWNER       = data.aws_caller_identity.current.account_id
     DOCUMENTDB_URI         = module.documentdb.documentdb_uri
     DB_NAME                = var.db_name
     JOBS_COLLECTION        = var.jobs_collection

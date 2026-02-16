@@ -88,11 +88,11 @@ variable "frontend_max_capacity" {
   default     = 4
 }
 
-variable "frontend_ecr_repository_arn" {
-  type        = string
-  description = "(Optional) ARN of ECR repository for Frontend image access"
-  default     = ""
-}
+#variable "frontend_ecr_repository_arn" {
+#  type        = string
+#  description = "(Optional) ARN of ECR repository for Frontend image access"
+#  default     = ""
+#}
 
 variable "backend_base_url" {
   type        = string
@@ -143,11 +143,11 @@ variable "backend_max_capacity" {
   default     = 4
 }
 
-variable "backend_ecr_repository_arn" {
-  type        = string
-  description = "(Optional) ARN of ECR repository for Backend image access"
-  default     = ""
-}
+#variable "backend_ecr_repository_arn" {
+#  type        = string
+#  description = "(Optional) ARN of ECR repository for Backend image access"
+#  default     = ""
+#}
 
 # DocumentDB Variables
 variable "documentdb_engine_version" {
@@ -255,11 +255,11 @@ variable "ingestion_max_capacity" {
   default     = 3
 }
 
-variable "ingestion_ecr_repository_arn" {
-  type        = string
-  description = "(Optional) ARN of ECR repository for image access"
-  default     = ""
-}
+#variable "ingestion_ecr_repository_arn" {
+#  type        = string
+#  description = "(Optional) ARN of ECR repository for image access"
+#  default     = ""
+#}
 
 variable "ingestion_sqs_visibility_timeout" {
   type        = number
