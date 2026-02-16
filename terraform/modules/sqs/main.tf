@@ -30,6 +30,7 @@ resource "aws_sqs_queue" "main" {
   }
 }
 
+/*
 # Queue Policy to allow S3 notifications
 resource "aws_sqs_queue_policy" "allow_s3" {
   queue_url = aws_sqs_queue.main.id
@@ -53,3 +54,4 @@ resource "aws_sqs_queue_policy" "allow_s3" {
     ]
   })
 }
+*/
