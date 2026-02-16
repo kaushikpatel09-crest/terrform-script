@@ -242,7 +242,7 @@ module "documentdb" {
 
   environment           = var.environment
   project_name          = var.project_name
-  cluster_identifier    = "${var.project_name}-docdb-${var.environment}-v3"
+  cluster_identifier    = "${var.project_name}-docdb-${var.environment}"
   engine_version        = var.documentdb_engine_version
   master_username       = var.documentdb_master_username
   master_password       = var.documentdb_master_password
