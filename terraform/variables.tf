@@ -327,11 +327,11 @@ variable "ingestion_poll_interval_seconds" {
 #  default     = ""
 #}
 
-variable "ingestion_aws_bucket_owner" {
-  type        = string
-  description = "AWS bucket owner"
-  default     = ""
-}
+#variable "ingestion_aws_bucket_owner" {
+#  type        = string
+#  description = "AWS bucket owner"
+#  default     = ""
+#}
 
 variable "opensearch_service" {
   type        = string
@@ -351,11 +351,11 @@ variable "embedding_model_name" {
   default     = ""
 }
 
-variable "s3_bucket_owner_id" {
-  type        = string
-  description = "S3 bucket owner ID"
-  default     = ""
-}
+#variable "s3_bucket_owner_id" {
+#  type        = string
+#  description = "S3 bucket owner ID"
+#  default     = ""
+#}
 
 #variable "s3_bucket_name" {
 #  type        = string
