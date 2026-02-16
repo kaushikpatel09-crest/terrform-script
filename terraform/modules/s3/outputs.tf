@@ -36,3 +36,13 @@ output "all_bucket_arns" {
     aws_s3_bucket.processed.arn
   ]
 }
+
+output "image_search_bucket_name" {
+  description = "Image search S3 bucket name"
+  value       = aws_s3_bucket.image_search.id
+}
+
+output "landing" {
+  description = "Landing S3 bucket name"
+  value       = aws_s3_bucket.landing.id
+}

@@ -139,7 +139,7 @@ module "ecs_backend" {
     OPENSEARCH_INDEX_NAME = var.opensearch_index_name
     EMBEDDING_MODEL_NAME  = var.embedding_model_name
     S3_BUCKET_OWNER_ID    = var.s3_bucket_owner_id
-    IMAGE_SEARCH_BUCKET   = var.s3_bucket_name
+    IMAGE_SEARCH_BUCKET   = module.s3_buckets.image_search_bucket_name
     DOCUMENTDB_URI        = module.documentdb.documentdb_uri
     DB_NAME               = var.db_name
     ERRORS_COLLECTION     = var.errors_collection
@@ -221,7 +221,7 @@ module "ecs_ingestion" {
     MAX_DURATION_MINUTES   = var.ingestion_max_duration_minutes
     MAX_WAIT_TIME_SECONDS  = var.ingestion_max_wait_time_seconds
     POLL_INTERVAL_SECONDS  = var.ingestion_poll_interval_seconds
-    PROCESSED_BUCKET       = var.ingestion_processed_bucket
+    PROCESSED_BUCKET       = module.s3_buckets.landing_bucket_name
     AWS_BUCKET_OWNER       = var.ingestion_aws_bucket_owner
     DOCUMENTDB_URI         = module.documentdb.documentdb_uri
     DB_NAME                = var.db_name
