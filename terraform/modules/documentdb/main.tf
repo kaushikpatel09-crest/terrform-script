@@ -49,7 +49,7 @@ resource "aws_docdb_cluster" "main" {
 resource "aws_docdb_cluster_parameter_group" "main" {
   #  name_prefix = "${var.project_name}-"
   name        = "${var.project_name}-docdb-cluster-pg-${var.environment}"
-  family      = "docdb4.0"
+  family      = "docdb8.0"
   description = "Parameter group for ${var.cluster_identifier}"
 
   parameter {
