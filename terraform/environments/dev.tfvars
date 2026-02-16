@@ -15,7 +15,7 @@ frontend_task_memory        = 512
 frontend_desired_count      = 1
 frontend_min_capacity       = 1
 frontend_max_capacity       = 2
-frontend_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-frontend" # Update with your ECR repo ARN
+#frontend_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-frontend" # Update with your ECR repo ARN
 backend_base_url            = ""                                                                  # Will be set via GitHub Actions environment variable
 
 # ECS Backend Configuration
@@ -26,7 +26,7 @@ backend_task_memory        = 512
 backend_desired_count      = 1
 backend_min_capacity       = 1
 backend_max_capacity       = 2
-backend_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-backend"                              # Update with your ECR repo ARN
+#backend_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-backend"                              # Update with your ECR repo ARN
 bedrock_model_arn          = "arn:aws:bedrock:us-east-1:943143228843:inference-profile/us.twelvelabs.marengo-embed-3-0-v1:0" # Update with your Bedrock model ARN
 
 # DocumentDB Configuration
@@ -45,7 +45,7 @@ ingestion_task_memory        = 512
 ingestion_desired_count      = 1
 ingestion_min_capacity       = 1
 ingestion_max_capacity       = 2
-ingestion_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-ingestion-dev" # Update with your ECR repo ARN
+#ingestion_ecr_repository_arn = "arn:aws:ecr:us-east-1:943143228843:repository/conde-nast-ingestion-dev" # Update with your ECR repo ARN
 
 # Load Balancer Configuration
 enable_https    = false
