@@ -66,7 +66,7 @@ ingestion_max_wait_time_seconds = 3600
 ingestion_poll_interval_seconds = 30
 
 # Buckets
-ingestion_processed_bucket = "conde-nast-landing-dev"
+#ingestion_processed_bucket = "conde-nast-landing-dev"
 ingestion_aws_bucket_owner = "943143228843"
 
 
@@ -74,7 +74,7 @@ opensearch_service    = "aoss"
 opensearch_index_name = "video_clips_3_faiss_per_modality"
 embedding_model_name  = "us.twelvelabs.marengo-embed-3-0-v1:0"
 s3_bucket_owner_id    = "943143228843"
-s3_bucket_name        = "conde-nast-image-search-dev"
+#s3_bucket_name        = "conde-nast-image-search-dev"
 
 
 db_name           = "video_search"
