@@ -87,7 +87,7 @@ module "ecs_frontend" {
   subnet_ids         = module.vpc.private_subnet_ids
   security_group_ids = [module.vpc.ecs_frontend_security_group_id]
 
-  container_image     = var.frontend_image
+  container_image     = module.ecr_frontend.repository_url
   container_image_tag = var.frontend_image_tag
   log_group_name      = "/ecs/${var.project_name}-fe-${var.environment}"
 
@@ -123,7 +123,7 @@ module "ecs_backend" {
   subnet_ids         = module.vpc.private_subnet_ids
   security_group_ids = [module.vpc.ecs_backend_security_group_id]
 
-  container_image     = var.backend_image
+  container_image     = module.ecr_backend.repository_url
   container_image_tag = var.backend_image_tag
   log_group_name      = "/ecs/${var.project_name}-be-${var.environment}"
   bedrock_model_arn   = var.bedrock_model_arn
@@ -194,15 +194,14 @@ module "ecs_ingestion" {
   subnet_ids         = module.vpc.private_subnet_ids
   security_group_ids = [module.vpc.ecs_ingestion_security_group_id]
 
-  container_image     = var.ingestion_image
+  container_image     = module.ecr_ingestion.repository_url
   container_image_tag = var.ingestion_image_tag
   log_group_name      = "/ecs/${var.project_name}-ingestion-${var.environment}"
 
   # S3 bucket access
-  enable_s3_access  = true
-  s3_bucket_arns    = module.s3_buckets.all_bucket_arns
-  bedrock_model_arn = var.bedrock_model_arn
-  # ecr_repository_arn           = var.ingestion_ecr_repository_arn
+  enable_s3_access             = true
+  s3_bucket_arns               = module.s3_buckets.all_bucket_arns
+  bedrock_model_arn            = var.bedrock_model_arn
   ecr_repository_arn           = module.ecr_ingestion.repository_arn
   sqs_queue_arn                = module.sqs_landing.queue_arn
   enable_sqs_access            = true

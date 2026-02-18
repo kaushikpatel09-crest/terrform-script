@@ -46,11 +46,6 @@ variable "private_subnet_cidrs" {
 }
 
 # ECS Frontend Variables
-variable "frontend_image" {
-  type        = string
-  description = "Frontend container image URL"
-  default     = "nginx:latest"
-}
 
 variable "frontend_image_tag" {
   type        = string
@@ -101,11 +96,6 @@ variable "backend_base_url" {
 }
 
 # ECS Backend Variables
-variable "backend_image" {
-  type        = string
-  description = "Backend container image URL"
-  default     = "node:18-alpine"
-}
 
 variable "backend_image_tag" {
   type        = string
@@ -213,11 +203,6 @@ variable "bedrock_model_arn" {
 }
 
 # Ingestion Service Variables
-variable "ingestion_image" {
-  type        = string
-  description = "Container image for Ingestion service"
-  default     = "node"
-}
 
 variable "ingestion_image_tag" {
   type        = string
