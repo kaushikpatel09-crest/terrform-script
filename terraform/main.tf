@@ -25,6 +25,13 @@ provider "aws" {
   }
 }
 
+# Dynamically constructed ARNs and other computed values
+locals {
+  # Bedrock inference profile ARN - constructed from region, account ID, and model ID
+  # This avoids hardcoding account ID or region in tfvars - only the model ID is needed
+  bedrock_model_arn = var.bedrock_model_id != "" ? "arn:aws:bedrock:${var.aws_region}:${data.aws_caller_identity.current.account_id}:inference-profile/${var.bedrock_model_id}" : ""
+}
+
 # ECR Frontend Repository
 module "ecr_frontend" {
   source = "./modules/ecr"
@@ -126,7 +133,7 @@ module "ecs_backend" {
   container_image     = module.ecr_backend.repository_url
   container_image_tag = var.backend_image_tag
   log_group_name      = "/ecs/${var.project_name}-be-${var.environment}"
-  bedrock_model_arn   = var.bedrock_model_arn
+  bedrock_model_arn   = local.bedrock_model_arn
 
   #ecr_repository_arn = var.backend_ecr_repository_arn
   ecr_repository_arn = module.ecr_backend.repository_arn
@@ -201,7 +208,7 @@ module "ecs_ingestion" {
   # S3 bucket access
   enable_s3_access             = true
   s3_bucket_arns               = module.s3_buckets.all_bucket_arns
-  bedrock_model_arn            = var.bedrock_model_arn
+  bedrock_model_arn            = local.bedrock_model_arn
   ecr_repository_arn           = module.ecr_ingestion.repository_arn
   sqs_queue_arn                = module.sqs_landing.queue_arn
   enable_sqs_access            = true

@@ -196,9 +196,9 @@ variable "certificate_arn" {
   default     = ""
 }
 
-variable "bedrock_model_arn" {
+variable "bedrock_model_id" {
   type        = string
-  description = "ARN of the Bedrock model to use for inference"
+  description = "Bedrock inference profile model ID (e.g. us.provider.model-name:version). The full ARN is constructed dynamically."
   default     = ""
 }
 
@@ -371,3 +371,4 @@ variable "search_collection" {
   description = "DocumentDB search collection name"
   default     = ""
 }
+

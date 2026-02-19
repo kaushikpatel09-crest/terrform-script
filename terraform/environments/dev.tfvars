@@ -23,7 +23,7 @@ backend_task_memory   = 512
 backend_desired_count = 1
 backend_min_capacity  = 1
 backend_max_capacity  = 2
-bedrock_model_arn     = "arn:aws:bedrock:us-east-1:943143228843:inference-profile/us.twelvelabs.marengo-embed-3-0-v1:0" # Update with your Bedrock model ARN
+bedrock_model_id      = "us.twelvelabs.marengo-embed-3-0-v1:0" # Only the model ID - ARN is constructed dynamically by Terraform
 
 # DocumentDB Configuration
 documentdb_engine_version        = "8.0.0"
@@ -61,13 +61,13 @@ ingestion_poll_interval_seconds = 30
 
 # Buckets
 #ingestion_processed_bucket = "conde-nast-landing-dev"
-ingestion_aws_bucket_owner = "943143228843"
+#ingestion_aws_bucket_owner = "943143228843"
 
 
 opensearch_service    = "aoss"
 opensearch_index_name = "video_clips_3_faiss_per_modality"
 embedding_model_name  = "us.twelvelabs.marengo-embed-3-0-v1:0"
-s3_bucket_owner_id    = "943143228843"
+#s3_bucket_owner_id    = "943143228843"
 #s3_bucket_name        = "conde-nast-image-search-dev"
 
 
