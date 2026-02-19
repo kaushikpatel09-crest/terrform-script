@@ -217,26 +217,30 @@ module "ecs_ingestion" {
   depends_on = [module.vpc, module.s3_buckets, module.sqs_landing]
 
   environment_variables = {
-    OPENSEARCH_ENDPOINT    = module.opensearch.collection_endpoint
-    SQS_QUEUE_URL          = module.sqs_landing.queue_url
-    AWS_REGION             = var.aws_region
-    SQS_VISIBILITY_TIMEOUT = var.ingestion_sqs_visibility_timeout
-    SQS_WAIT_TIME_SECONDS  = var.ingestion_sqs_wait_time_seconds
-    SQS_HEARTBEAT_INTERVAL = var.ingestion_sqs_heartbeat_interval
-    SQS_MAX_MESSAGES       = var.ingestion_sqs_max_messages
-    CONCURRENCY            = var.ingestion_concurrency
-    INDEX_NAME             = var.ingestion_index_name
-    MAX_SIZE_GB            = var.ingestion_max_size_gb
-    MAX_DURATION_MINUTES   = var.ingestion_max_duration_minutes
-    MAX_WAIT_TIME_SECONDS  = var.ingestion_max_wait_time_seconds
-    POLL_INTERVAL_SECONDS  = var.ingestion_poll_interval_seconds
-    PROCESSED_BUCKET       = module.s3_buckets.landing_bucket_name
-    AWS_BUCKET_OWNER       = data.aws_caller_identity.current.account_id
-    DOCUMENTDB_URI         = module.documentdb.documentdb_uri
-    DB_NAME                = var.db_name
-    JOBS_COLLECTION        = var.jobs_collection
-    ERRORS_COLLECTION      = var.errors_collection
-    SEARCH_COLLECTION      = var.search_collection
+    OPENSEARCH_ENDPOINT      = module.opensearch.collection_endpoint
+    SQS_QUEUE_URL            = module.sqs_landing.queue_url
+    AWS_REGION               = var.aws_region
+    SQS_VISIBILITY_TIMEOUT   = var.ingestion_sqs_visibility_timeout
+    SQS_WAIT_TIME_SECONDS    = var.ingestion_sqs_wait_time_seconds
+    SQS_HEARTBEAT_INTERVAL   = var.ingestion_sqs_heartbeat_interval
+    SQS_MAX_MESSAGES         = var.ingestion_sqs_max_messages
+    CONCURRENCY              = var.ingestion_concurrency
+    INDEX_NAME               = var.ingestion_index_name
+    MAX_SIZE_GB              = var.ingestion_max_size_gb
+    MAX_DURATION_MINUTES     = var.ingestion_max_duration_minutes
+    MAX_WAIT_TIME_SECONDS    = var.ingestion_max_wait_time_seconds
+    POLL_INTERVAL_SECONDS    = var.ingestion_poll_interval_seconds
+    PROCESSED_BUCKET         = module.s3_buckets.landing_bucket_name
+    AWS_BUCKET_OWNER         = data.aws_caller_identity.current.account_id
+    DOCUMENTDB_URI           = module.documentdb.documentdb_uri
+    DB_NAME                  = var.db_name
+    JOBS_COLLECTION          = var.jobs_collection
+    ERRORS_COLLECTION        = var.errors_collection
+    SEARCH_COLLECTION        = var.search_collection
+    VISUAL_INDEX_NAME        = var.visual_index_name
+    AUDIO_INDEX_NAME         = var.audio_index_name
+    TRANSCRIPTION_INDEX_NAME = var.transcription_index_name
+
 
 
   }

@@ -59,6 +59,9 @@ ingestion_max_duration_minutes  = 240
 ingestion_max_wait_time_seconds = 3600
 ingestion_poll_interval_seconds = 30
 
+visual_index_name        = "conde-nast-visual-index-dev"
+audio_index_name         = "conde-nast-audio-index-dev"
+transcription_index_name = "conde-nast-transcription-index-dev"
 # Buckets
 #ingestion_processed_bucket = "conde-nast-landing-dev"
 #ingestion_aws_bucket_owner = "943143228843"

@@ -306,6 +306,24 @@ variable "ingestion_poll_interval_seconds" {
   default     = 30
 }
 
+variable "visual_index_name" {
+  type        = string
+  description = "Name of the index to use"
+  default     = ""
+}
+
+variable "audio_index_name" {
+  type        = string
+  description = "Name of the index to use"
+  default     = ""
+}
+
+variable "transcription_index_name" {
+  type        = string
+  description = "Name of the index to use"
+  default     = ""
+}
+
 #variable "ingestion_processed_bucket" {
 #  type        = string
 #  description = "Bucket to store processed files"
