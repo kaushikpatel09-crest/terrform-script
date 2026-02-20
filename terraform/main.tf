@@ -158,6 +158,8 @@ module "ecs_backend" {
     DB_NAME               = var.db_name
     ERRORS_COLLECTION     = var.errors_collection
     SEARCH_COLLECTION     = var.search_collection
+    AWS_REGION            = var.aws_region
+    QUERY_FETCH_SIZE      = var.query_fetch_size
   }
 
 
