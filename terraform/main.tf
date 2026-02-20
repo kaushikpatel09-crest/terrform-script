@@ -101,6 +101,9 @@ module "ecs_frontend" {
   #ecr_repository_arn = var.frontend_ecr_repository_arn
   ecr_repository_arn = module.ecr_frontend.repository_arn
 
+  # Frontend does not need OpenSearch access
+  enable_ecs_opensearch_access = false
+
   environment_variables = {
     VITE_BE_BASE_URL = var.backend_base_url
   }
@@ -136,7 +139,9 @@ module "ecs_backend" {
   bedrock_model_arn   = local.bedrock_model_arn
 
   #ecr_repository_arn = var.backend_ecr_repository_arn
-  ecr_repository_arn = module.ecr_backend.repository_arn
+  ecr_repository_arn           = module.ecr_backend.repository_arn
+  enable_ecs_opensearch_access = true
+  opensearch_collection_arn    = module.opensearch.collection_arn
 
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
@@ -213,6 +218,7 @@ module "ecs_ingestion" {
   sqs_queue_arn                = module.sqs_landing.queue_arn
   enable_sqs_access            = true
   enable_ecs_opensearch_access = true
+  opensearch_collection_arn    = module.opensearch.collection_arn
 
   depends_on = [module.vpc, module.s3_buckets, module.sqs_landing]
 

@@ -45,7 +45,10 @@ resource "aws_ecr_lifecycle_policy" "main" {
   })
 }
 
-# Repository policy to allow ECS task execution role to pull images
+# Data source to get current AWS account ID
+data "aws_caller_identity" "current" {}
+
+# Repository policy - restricts access to the current AWS account only (CKV_AWS_32 compliant)
 resource "aws_ecr_repository_policy" "main" {
   repository = aws_ecr_repository.main.name
 
@@ -53,9 +56,10 @@ resource "aws_ecr_repository_policy" "main" {
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "AllowAccountAccess"
         Effect = "Allow"
         Principal = {
-          AWS = "*"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         }
         Action = [
           "ecr:GetDownloadUrlForLayer",

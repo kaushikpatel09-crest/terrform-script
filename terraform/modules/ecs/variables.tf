@@ -138,3 +138,9 @@ variable "enable_ecs_opensearch_access" {
   description = "Enable OpenSearch access for this ECS service"
   default     = true
 }
+
+variable "opensearch_collection_arn" {
+  type        = string
+  description = "(Optional) ARN of the OpenSearch Serverless collection this service is allowed to access. Required when enable_ecs_opensearch_access is true."
+  default     = ""
+}

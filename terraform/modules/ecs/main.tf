@@ -191,6 +191,9 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 }
 
 # Inline policy to allow pulling images from ECR
+# Split into two statements:
+#   1. ecr:GetAuthorizationToken MUST use Resource="*" (it is account-level, not repo-level — AWS requirement)
+#   2. Image pull actions are scoped to the specific ECR repository ARN
 resource "aws_iam_role_policy" "ecs_ecr_pull" {
   name = "${var.project_name}-ecs-ecr-pull-${var.service_name}-${var.environment}"
   role = aws_iam_role.ecs_task_execution_role.id
@@ -199,13 +202,23 @@ resource "aws_iam_role_policy" "ecs_ecr_pull" {
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "ECRAuthToken"
         Effect = "Allow"
         Action = [
-          "ecr:GetAuthorizationToken",
-          "ecr:BatchGetImage",
-          "ecr:GetDownloadUrlForLayer"
+          "ecr:GetAuthorizationToken"
         ]
-        Resource = "*"
+        # GetAuthorizationToken is account-level — AWS does not support resource-level restriction
+        Resource = "*" #checkov:skip=CKV_AWS_355:ecr:GetAuthorizationToken is account-scoped and cannot be restricted to a specific resource
+      },
+      {
+        Sid    = "ECRImagePull"
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchCheckLayerAvailability"
+        ]
+        Resource = var.ecr_repository_arn
       }
     ]
   })
@@ -341,9 +354,9 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 
-# OpenSearch access from ecs ingestion service
+# OpenSearch Serverless access for ECS services
 resource "aws_iam_role_policy" "ecs_opensearch_access" {
-  count = var.enable_ecs_opensearch_access ? 1 : 0
+  count = var.enable_ecs_opensearch_access && var.opensearch_collection_arn != "" ? 1 : 0
 
   name = "${var.project_name}-ecs-aoss-access-${var.service_name}-${var.environment}"
   role = aws_iam_role.ecs_task_role.id
@@ -352,11 +365,12 @@ resource "aws_iam_role_policy" "ecs_opensearch_access" {
     Version = "2012-10-17",
     Statement = [
       {
+        Sid    = "OpenSearchCollectionAccess"
         Effect = "Allow",
         Action = [
           "aoss:APIAccessAll"
         ],
-        Resource = "*"
+        Resource = var.opensearch_collection_arn
       }
     ]
   })
