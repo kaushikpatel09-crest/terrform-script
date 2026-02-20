@@ -14,7 +14,7 @@ frontend_task_memory   = 512
 frontend_desired_count = 1
 frontend_min_capacity  = 1
 frontend_max_capacity  = 2
-backend_base_url       = "" # Will be set via GitHub Actions environment variable
+backend_base_url       = "http://internal-conde-nast-internal-alb-dev-892911739.us-east-1.elb.amazonaws.com" # Will be set via GitHub Actions environment variable
 
 # ECS Backend Configuration
 backend_image_tag     = "latest"
@@ -24,6 +24,7 @@ backend_desired_count = 1
 backend_min_capacity  = 1
 backend_max_capacity  = 2
 bedrock_model_id      = "us.twelvelabs.marengo-embed-3-0-v1:0" # Only the model ID - ARN is constructed dynamically by Terraform
+query_fetch_size      = 100
 
 # DocumentDB Configuration
 documentdb_engine_version        = "8.0.0"
@@ -68,7 +69,7 @@ transcription_index_name = "conde-nast-transcription-index-dev"
 
 
 opensearch_service    = "aoss"
-opensearch_index_name = "video_clips_3_faiss_per_modality"
+opensearch_index_name = "conde-nast-visual-index-dev"
 embedding_model_name  = "us.twelvelabs.marengo-embed-3-0-v1:0"
 #s3_bucket_owner_id    = "943143228843"
 #s3_bucket_name        = "conde-nast-image-search-dev"

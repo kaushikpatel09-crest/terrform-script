@@ -138,6 +138,11 @@ module "ecs_backend" {
   log_group_name      = "/ecs/${var.project_name}-be-${var.environment}"
   bedrock_model_arn   = local.bedrock_model_arn
 
+
+  # S3 bucket access
+  enable_s3_access = true
+  s3_bucket_arns   = module.s3_buckets.all_bucket_arns
+
   #ecr_repository_arn = var.backend_ecr_repository_arn
   ecr_repository_arn           = module.ecr_backend.repository_arn
   enable_ecs_opensearch_access = true
