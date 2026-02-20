@@ -265,8 +265,8 @@ resource "aws_iam_role_policy" "ecs_bedrock_invoke" {
         ],
         Resource = [
           var.bedrock_model_arn,
-          "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:async-invoke/*",
-          "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/twelvelabs.marengo-embed-3-0-v1:0"
+          "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:async-invoke/*",
+          "arn:aws:bedrock:*::foundation-model/twelvelabs.marengo-embed-3-0-v1:0"
         ]
       }
     ]
