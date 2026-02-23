@@ -246,7 +246,7 @@ module "ecs_ingestion" {
     MAX_DURATION_MINUTES     = var.ingestion_max_duration_minutes
     MAX_WAIT_TIME_SECONDS    = var.ingestion_max_wait_time_seconds
     POLL_INTERVAL_SECONDS    = var.ingestion_poll_interval_seconds
-    PROCESSED_BUCKET         = module.s3_buckets.landing_bucket_name
+    PROCESSED_BUCKET         = module.s3_buckets.processed_bucket_name
     AWS_BUCKET_OWNER         = data.aws_caller_identity.current.account_id
     DOCUMENTDB_URI           = module.documentdb.documentdb_uri
     DB_NAME                  = var.db_name
