@@ -19,7 +19,8 @@ resource "aws_cloudwatch_log_group" "ecs" {
 
 # ECS Cluster
 resource "aws_ecs_cluster" "main" {
-  name = var.cluster_name
+  count = var.create_cluster ? 1 : 0
+  name  = var.cluster_name
 
   setting {
     name  = "containerInsights"
@@ -34,7 +35,8 @@ resource "aws_ecs_cluster" "main" {
 
 # ECS Cluster Capacity Providers
 resource "aws_ecs_cluster_capacity_providers" "main" {
-  cluster_name = aws_ecs_cluster.main.name
+  count        = var.create_cluster ? 1 : 0
+  cluster_name = aws_ecs_cluster.main[0].name
 
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 
@@ -96,7 +98,7 @@ resource "aws_ecs_task_definition" "main" {
 # ECS Service
 resource "aws_ecs_service" "main" {
   name            = var.service_name
-  cluster         = aws_ecs_cluster.main.id
+  cluster         = var.cluster_name
   task_definition = aws_ecs_task_definition.main.arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
@@ -127,7 +129,7 @@ resource "aws_ecs_service" "main" {
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = var.max_capacity
   min_capacity       = var.min_capacity
-  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
+  resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }

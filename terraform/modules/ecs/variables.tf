@@ -144,3 +144,9 @@ variable "opensearch_collection_arn" {
   description = "(Required when enable_ecs_opensearch_access = true) ARN of the OpenSearch Serverless collection this service is allowed to access."
   default     = ""
 }
+
+variable "create_cluster" {
+  type        = bool
+  description = "Whether to create a new ECS cluster. Set to false to use an existing cluster."
+  default     = true
+}

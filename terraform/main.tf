@@ -80,7 +80,8 @@ module "ecs_frontend" {
 
   environment    = var.environment
   project_name   = var.project_name
-  cluster_name   = "${var.project_name}-fe-${var.environment}"
+  cluster_name   = "${var.project_name}-app-${var.environment}"
+  create_cluster = true
   service_name   = "fe-service"
   container_name = "frontend"
   container_port = 3000
@@ -119,7 +120,8 @@ module "ecs_backend" {
 
   environment    = var.environment
   project_name   = var.project_name
-  cluster_name   = "${var.project_name}-be-${var.environment}"
+  cluster_name   = "${var.project_name}-app-${var.environment}"
+  create_cluster = false
   service_name   = "be-service"
   container_name = "backend"
   container_port = 8080
@@ -153,7 +155,7 @@ module "ecs_backend" {
 
   load_balancer_target_group_arn = module.internal_alb.target_group_arn
 
-  depends_on = [module.vpc, module.internal_alb]
+  depends_on = [module.vpc, module.internal_alb, module.ecs_frontend]
   environment_variables = {
     OPENSEARCH_ENDPOINT   = module.opensearch.collection_endpoint
     OPENSEARCH_REGION     = var.aws_region

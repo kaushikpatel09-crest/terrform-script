@@ -1,11 +1,11 @@
 output "cluster_name" {
   description = "ECS cluster name"
-  value       = aws_ecs_cluster.main.name
+  value       = var.create_cluster ? aws_ecs_cluster.main[0].name : var.cluster_name
 }
 
 output "cluster_arn" {
   description = "ECS cluster ARN"
-  value       = aws_ecs_cluster.main.arn
+  value       = var.create_cluster ? aws_ecs_cluster.main[0].arn : ""
 }
 
 output "service_name" {
