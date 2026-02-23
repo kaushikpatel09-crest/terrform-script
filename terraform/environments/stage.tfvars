@@ -8,31 +8,74 @@ public_subnet_cidrs  = ["10.2.1.0/24", "10.2.2.0/24"]
 private_subnet_cidrs = ["10.2.10.0/24", "10.2.20.0/24", "10.2.30.0/24"]
 
 # ECS Frontend Configuration
-frontend_image         = "nginx"
 frontend_image_tag     = "latest"
-frontend_task_cpu      = 512
-frontend_task_memory   = 1024
-frontend_desired_count = 2
-frontend_min_capacity  = 2
-frontend_max_capacity  = 6
+frontend_task_cpu      = 256
+frontend_task_memory   = 512
+frontend_desired_count = 1
+frontend_min_capacity  = 1
+frontend_max_capacity  = 2
+backend_base_url       = "http://int-conde-nast-internal-alb-dev-892911739.us-east-1.elb.amazonaws.com" # Will be set via GitHub Actions environment variable
 
 # ECS Backend Configuration
-backend_image         = "node"
-backend_image_tag     = "18-alpine"
-backend_task_cpu      = 512
-backend_task_memory   = 1024
-backend_desired_count = 2
-backend_min_capacity  = 2
-backend_max_capacity  = 6
+backend_image_tag     = "latest"
+backend_task_cpu      = 256
+backend_task_memory   = 512
+backend_desired_count = 1
+backend_min_capacity  = 1
+backend_max_capacity  = 2
+bedrock_model_id      = "us.twelvelabs.marengo-embed-3-0-v1:0" # Only the model ID - ARN is constructed dynamically by Terraform
+query_fetch_size      = 100
 
 # DocumentDB Configuration
-documentdb_engine_version        = "4.0.0"
-documentdb_master_username       = "admin"
-documentdb_backup_retention_days = 30
-documentdb_num_instances         = 3
+documentdb_engine_version        = "8.0.0"
+documentdb_master_username       = "masteruser"
+documentdb_backup_retention_days = 7
+documentdb_num_instances         = 1
 documentdb_instance_class        = "db.t3.medium"
-documentdb_skip_final_snapshot   = false
+documentdb_skip_final_snapshot   = true
+
+# ECS Ingestion Backend Service Configuration
+ingestion_image_tag     = "latest"
+ingestion_task_cpu      = 256
+ingestion_task_memory   = 512
+ingestion_desired_count = 1
+ingestion_min_capacity  = 1
+ingestion_max_capacity  = 2
 
 # Load Balancer Configuration
-enable_https    = true
-certificate_arn = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERTIFICATE_ID" # Update with your certificate
+enable_https    = false
+certificate_arn = ""
+
+# SQS Settings
+ingestion_sqs_visibility_timeout = 300
+ingestion_sqs_wait_time_seconds  = 20
+ingestion_sqs_heartbeat_interval = 120
+ingestion_sqs_max_messages       = 1
+
+# Ingestion Settings
+ingestion_concurrency           = 1
+ingestion_index_name            = "video-index-stage"
+ingestion_max_size_gb           = 6
+ingestion_max_duration_minutes  = 240
+ingestion_max_wait_time_seconds = 3600
+ingestion_poll_interval_seconds = 30
+
+visual_index_name        = "conde-nast-visual-index-stage"
+audio_index_name         = "conde-nast-audio-index-stage"
+transcription_index_name = "conde-nast-transcription-index-stage"
+# Buckets
+#ingestion_processed_bucket = "conde-nast-landing-dev"
+#ingestion_aws_bucket_owner = "943143228843"
+
+
+opensearch_service    = "aoss"
+opensearch_index_name = "conde-nast-visual-index-stage"
+embedding_model_name  = "us.twelvelabs.marengo-embed-3-0-v1:0"
+#s3_bucket_owner_id    = "943143228843"
+#s3_bucket_name        = "conde-nast-image-search-dev"
+
+
+db_name           = "video_search"
+jobs_collection   = "video_ingestion_jobs"
+errors_collection = "video_pipeline_errors"
+search_collection = "video_search_logs"
