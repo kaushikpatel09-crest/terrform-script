@@ -82,7 +82,7 @@ module "ecs_frontend" {
   project_name   = var.project_name
   cluster_name   = "${var.project_name}-app-${var.environment}"
   create_cluster = true
-  service_name   = "fe-service"
+  service_name   = "fe"
   container_name = "frontend"
   container_port = 3000
   task_cpu       = var.frontend_task_cpu
@@ -122,7 +122,7 @@ module "ecs_backend" {
   project_name   = var.project_name
   cluster_name   = "${var.project_name}-app-${var.environment}"
   create_cluster = false
-  service_name   = "be-service"
+  service_name   = "be"
   container_name = "backend"
   container_port = 8080
   task_cpu       = var.backend_task_cpu
@@ -205,7 +205,7 @@ module "ecs_ingestion" {
   environment    = var.environment
   project_name   = var.project_name
   cluster_name   = "${var.project_name}-ingestion-${var.environment}"
-  service_name   = "ingestion-service"
+  service_name   = "ingestion"
   container_name = "ingestion"
   container_port = 9001
   task_cpu       = var.ingestion_task_cpu

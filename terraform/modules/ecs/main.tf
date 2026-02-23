@@ -49,7 +49,7 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 
 # ECS Task Definition
 resource "aws_ecs_task_definition" "main" {
-  family                   = "${var.project_name}-${var.service_name}"
+  family                   = "${var.project_name}-${var.service_name}-task-definition-${var.environment}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.task_cpu
@@ -91,7 +91,7 @@ resource "aws_ecs_task_definition" "main" {
   }])
 
   tags = {
-    Name = "${var.project_name}-${var.service_name}-task"
+    Name = "${var.project_name}-${var.service_name}-task-definition-${var.environment}"
   }
 }
 
