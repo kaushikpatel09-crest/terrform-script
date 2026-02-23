@@ -85,22 +85,6 @@ output "internal_alb_arn" {
   value       = module.internal_alb.load_balancer_arn
 }
 
-# S3 Buckets Outputs
-output "s3_landing_bucket" {
-  description = "Landing zone S3 bucket name"
-  value       = module.s3_buckets.landing_bucket_name
-}
-
-output "s3_raw_bucket" {
-  description = "Raw zone S3 bucket name"
-  value       = module.s3_buckets.raw_bucket_name
-}
-
-output "s3_processed_bucket" {
-  description = "Processed zone S3 bucket name"
-  value       = module.s3_buckets.processed_bucket_name
-}
-
 # OpenSearch Outputs
 #output "opensearch_collection_id" {
 #  description = "OpenSearch collection ID"
