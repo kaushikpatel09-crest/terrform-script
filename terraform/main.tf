@@ -141,7 +141,10 @@ module "ecs_backend" {
 
   # S3 bucket access
   enable_s3_access = true
-  s3_bucket_arns   = module.s3_buckets.all_bucket_arns
+  s3_bucket_arns = [
+    module.s3_buckets.processed_bucket_arn,
+    module.s3_buckets.image_search_bucket_arn
+  ]
 
   #ecr_repository_arn = var.backend_ecr_repository_arn
   ecr_repository_arn           = module.ecr_backend.repository_arn
@@ -177,7 +180,7 @@ module "sqs_landing" {
   environment   = var.environment
   project_name  = var.project_name
   queue_name    = "landing-events"
-  s3_bucket_arn = module.s3_buckets.landing_bucket_arn
+  s3_bucket_arn = module.s3_buckets.processed_bucket_arn
 }
 
 # S3 Bucket Notification (Landing -> SQS)
@@ -219,7 +222,7 @@ module "ecs_ingestion" {
 
   # S3 bucket access
   enable_s3_access             = true
-  s3_bucket_arns               = module.s3_buckets.all_bucket_arns
+  s3_bucket_arns               = [module.s3_buckets.processed_bucket_arn]
   bedrock_model_arn            = local.bedrock_model_arn
   ecr_repository_arn           = module.ecr_ingestion.repository_arn
   sqs_queue_arn                = module.sqs_landing.queue_arn
