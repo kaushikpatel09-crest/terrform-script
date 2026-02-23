@@ -141,6 +141,6 @@ variable "enable_ecs_opensearch_access" {
 
 variable "opensearch_collection_arn" {
   type        = string
-  description = "(Optional) ARN of the OpenSearch Serverless collection this service is allowed to access. Required when enable_ecs_opensearch_access is true."
+  description = "(Required when enable_ecs_opensearch_access = true) ARN of the OpenSearch Serverless collection this service is allowed to access."
   default     = ""
 }

@@ -356,7 +356,9 @@ data "aws_caller_identity" "current" {}
 
 # OpenSearch Serverless access for ECS services
 resource "aws_iam_role_policy" "ecs_opensearch_access" {
-  count = var.enable_ecs_opensearch_access && var.opensearch_collection_arn != "" ? 1 : 0
+  # count must only use values known at plan time (static vars/locals).
+  # Computed resource attributes like module outputs cannot be used in count.
+  count = var.enable_ecs_opensearch_access ? 1 : 0
 
   name = "${var.project_name}-ecs-aoss-access-${var.service_name}-${var.environment}"
   role = aws_iam_role.ecs_task_role.id
