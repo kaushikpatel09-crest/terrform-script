@@ -292,11 +292,12 @@ module "documentdb" {
 module "secrets_docdb" {
   source = "./modules/secrets"
 
-  environment        = var.environment
-  project_name       = var.project_name
-  secret_name        = "${var.project_name}-documentdb-uri-${var.environment}"
-  secret_description = "DocumentDB connection URI"
-  secret_string      = module.documentdb.documentdb_uri
+  environment             = var.environment
+  project_name            = var.project_name
+  secret_name             = "${var.project_name}-documentdb-url-${var.environment}"
+  secret_description      = "DocumentDB connection URI"
+  secret_string           = module.documentdb.documentdb_uri
+  recovery_window_in_days = 7
 
   depends_on = [module.documentdb]
 }

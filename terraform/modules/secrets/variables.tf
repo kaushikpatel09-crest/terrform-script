@@ -24,3 +24,9 @@ variable "secret_string" {
   description = "The secret string value"
   sensitive   = true
 }
+
+variable "recovery_window_in_days" {
+  type        = number
+  description = "Number of days to retain deleted secrets (set to 0 for immediate deletion)"
+  default     = 7
+}
