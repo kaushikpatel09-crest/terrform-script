@@ -150,3 +150,9 @@ variable "create_cluster" {
   description = "Whether to create a new ECS cluster. Set to false to use an existing cluster."
   default     = true
 }
+
+variable "container_secrets" {
+  type        = map(string)
+  description = "(Optional) Map of environment variables up to set in the container from Secrets Manager. Example: { DB_PASSWORD = 'arn:aws:secretsmanager:...' }"
+  default     = {}
+}

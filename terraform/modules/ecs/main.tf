@@ -88,6 +88,12 @@ resource "aws_ecs_task_definition" "main" {
         }
       ]
     )
+    secrets = [
+      for key, value in var.container_secrets : {
+        name      = key
+        valueFrom = value
+      }
+    ]
   }])
 
   tags = {
@@ -221,6 +227,28 @@ resource "aws_iam_role_policy" "ecs_ecr_pull" {
           "ecr:BatchCheckLayerAvailability"
         ]
         Resource = var.ecr_repository_arn
+      }
+    ]
+  })
+}
+
+# IAM Role Policy to allow reading secrets from Secrets Manager
+resource "aws_iam_role_policy" "ecs_secrets_access" {
+  count = length(var.container_secrets) > 0 ? 1 : 0
+
+  name = "${var.project_name}-ecs-secrets-${var.service_name}-${var.environment}"
+  role = aws_iam_role.ecs_task_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowSecretsRead"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = values(var.container_secrets)
       }
     ]
   })

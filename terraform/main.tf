@@ -164,7 +164,6 @@ module "ecs_backend" {
     EMBEDDING_MODEL_NAME  = var.embedding_model_name
     S3_BUCKET_OWNER_ID    = data.aws_caller_identity.current.account_id
     IMAGE_SEARCH_BUCKET   = module.s3_buckets.image_search_bucket_name
-    DOCUMENTDB_URI        = module.documentdb.documentdb_uri
     DB_NAME               = var.db_name
     ERRORS_COLLECTION     = var.errors_collection
     SEARCH_COLLECTION     = var.search_collection
@@ -172,7 +171,9 @@ module "ecs_backend" {
     QUERY_FETCH_SIZE      = var.query_fetch_size
   }
 
-
+  container_secrets = {
+    DOCUMENTDB_URI = aws_secretsmanager_secret.documentdb_uri.arn
+  }
 }
 
 # SQS Module for Landing S3 Notifications
@@ -250,7 +251,6 @@ module "ecs_ingestion" {
     POLL_INTERVAL_SECONDS    = var.ingestion_poll_interval_seconds
     PROCESSED_BUCKET         = module.s3_buckets.processed_bucket_name
     AWS_BUCKET_OWNER         = data.aws_caller_identity.current.account_id
-    DOCUMENTDB_URI           = module.documentdb.documentdb_uri
     DB_NAME                  = var.db_name
     JOBS_COLLECTION          = var.jobs_collection
     ERRORS_COLLECTION        = var.errors_collection
@@ -258,9 +258,10 @@ module "ecs_ingestion" {
     VISUAL_INDEX_NAME        = var.visual_index_name
     AUDIO_INDEX_NAME         = var.audio_index_name
     TRANSCRIPTION_INDEX_NAME = var.transcription_index_name
+  }
 
-
-
+  container_secrets = {
+    DOCUMENTDB_URI = aws_secretsmanager_secret.documentdb_uri.arn
   }
 }
 
@@ -285,6 +286,22 @@ module "documentdb" {
   skip_final_snapshot = var.documentdb_skip_final_snapshot
 
   depends_on = [module.vpc]
+}
+
+# Secrets Manager Secret for DocumentDB URI
+resource "aws_secretsmanager_secret" "documentdb_uri" {
+  name        = "${var.project_name}-documentdb-uri-${var.environment}"
+  description = "DocumentDB connection URI"
+
+  tags = {
+    Name        = "${var.project_name}-documentdb-uri-${var.environment}"
+    Environment = var.environment
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "documentdb_uri" {
+  secret_id     = aws_secretsmanager_secret.documentdb_uri.id
+  secret_string = module.documentdb.documentdb_uri
 }
 
 # External ALB (Public facing from Internet Gateway)
