@@ -172,7 +172,7 @@ module "ecs_backend" {
   }
 
   container_secrets = {
-    DOCUMENTDB_URI = aws_secretsmanager_secret.documentdb_uri.arn
+    DOCUMENTDB_URI = module.secrets_docdb.secret_arn
   }
 }
 
@@ -261,7 +261,7 @@ module "ecs_ingestion" {
   }
 
   container_secrets = {
-    DOCUMENTDB_URI = aws_secretsmanager_secret.documentdb_uri.arn
+    DOCUMENTDB_URI = module.secrets_docdb.secret_arn
   }
 }
 
@@ -288,20 +288,17 @@ module "documentdb" {
   depends_on = [module.vpc]
 }
 
-# Secrets Manager Secret for DocumentDB URI
-resource "aws_secretsmanager_secret" "documentdb_uri" {
-  name        = "${var.project_name}-documentdb-uri-${var.environment}"
-  description = "DocumentDB connection URI"
+# Secrets Manager Module for DocumentDB URI
+module "secrets_docdb" {
+  source = "./modules/secrets"
 
-  tags = {
-    Name        = "${var.project_name}-documentdb-uri-${var.environment}"
-    Environment = var.environment
-  }
-}
+  environment        = var.environment
+  project_name       = var.project_name
+  secret_name        = "${var.project_name}-documentdb-uri-${var.environment}"
+  secret_description = "DocumentDB connection URI"
+  secret_string      = module.documentdb.documentdb_uri
 
-resource "aws_secretsmanager_secret_version" "documentdb_uri" {
-  secret_id     = aws_secretsmanager_secret.documentdb_uri.id
-  secret_string = module.documentdb.documentdb_uri
+  depends_on = [module.documentdb]
 }
 
 # External ALB (Public facing from Internet Gateway)
