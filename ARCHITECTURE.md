@@ -11,189 +11,200 @@
 │  │                    VPC (10.x.0.0/16)                                  │  │
 │  │                                                                       │  │
 │  │  ┌─────────────────────────────────────────────────────────────────┐ │  │
-│  │  │            PUBLIC SUBNET (10.x.1.0/24)                          │ │  │
+│  │  │                PUBLIC SUBNET (10.x.1.0/24)                      │ │  │
 │  │  │                                                                 │ │  │
-│  │  │  ┌──────────────────────┐      ┌──────────────────┐            │ │  │
-│  │  │  │  Internet Gateway    │◄────►│  NAT Gateway     │            │ │  │
-│  │  │  │  (IGW)               │      │  (EIP)           │            │ │  │
-│  │  │  └──────────────────────┘      └──────────────────┘            │ │  │
-│  │  │           │                             │                        │ │  │
-│  │  │           │                             │                        │ │  │
-│  │  │           ▼                             ▼                        │ │  │
+│  │  │  ┌──────────────────────┐    ┌──────────────────┐              │ │  │
+│  │  │  │  Internet Gateway    │◄──►│  NAT Gateway     │              │ │  │
+│  │  │  │  (IGW)               │    │  (Elastic IP)    │              │ │  │
+│  │  │  └──────────────────────┘    └──────────────────┘              │ │  │
+│  │  │           │ (inbound)                  │ (outbound)             │ │  │
+│  │  │           ▼                            ▼                        │ │  │
 │  │  │  ┌──────────────────────────────────────────────────────────┐  │ │  │
-│  │  │  │        EXTERNAL ALB (Public)                              │  │ │  │
-│  │  │  │  - Port 80: HTTP                                          │  │ │  │
-│  │  │  │  - Port 443: HTTPS (optional)                             │  │ │  │
-│  │  │  │  - SG: Allow 0.0.0.0/0                                    │  │ │  │
-│  │  │  │  - Routes to Internal ALB                                 │  │ │  │
+│  │  │  │        EXTERNAL ALB (Public-facing)                       │  │ │  │
+│  │  │  │  - Port 80 / 443 (HTTPS optional)                        │  │ │  │
+│  │  │  │  - SG: Allow 0.0.0.0/0                                   │  │ │  │
 │  │  │  └──────────────────────────────────────────────────────────┘  │ │  │
-│  │  │           │                                                      │ │  │
-│  │  └───────────┼──────────────────────────────────────────────────────┘ │  │
-│  │              │                                                        │  │
-│  │  ┌───────────┼────────────────────────────────────────────────────┐  │  │
-│  │  │           ▼                                                    │  │  │
-│  │  │  ┌──────────────────────────────────────────────────────────┐ │  │  │
-│  │  │  │        INTERNAL ALB (Private)                             │ │  │  │
-│  │  │  │  - Port 80: HTTP                                          │ │  │  │
-│  │  │  │  - SG: Allow from External ALB                            │ │  │  │
-│  │  │  │  - Subnets: Across all private subnets                    │ │  │  │
-│  │  │  └──────────────────────────────────────────────────────────┘ │  │  │
-│  │  │           │                                                    │  │  │
-│  │  └───────────┼────────────────────────────────────────────────────┘  │  │
-│  │              │                                                        │  │
-│  │  ┌───────────┴────────────┬─────────────────────────┐                │  │
-│  │  │                        │                         │                │  │
-│  │  ▼                        ▼                         ▼                │  │
-│  │  ┌──────────────────────────────────────────────────────────────┐   │  │
-│  │  │ PRIVATE SUBNET 1 (10.x.10.0/24)                              │   │  │
-│  │  │                                                              │   │  │
-│  │  │  ┌──────────────────────────────────────────────────────┐  │   │  │
-│  │  │  │  ECS FRONTEND CLUSTER                                │  │   │  │
-│  │  │  │  ├─ Service: frontend-service                        │  │   │  │
-│  │  │  │  ├─ Task Definition: Frontend App (Nginx/React)      │  │   │  │
-│  │  │  │  ├─ Container Port: 3000                             │  │   │  │
-│  │  │  │  ├─ Desired Count: 1-2 (dev), 2 (qa), 2 (stage)      │  │   │  │
-│  │  │  │  ├─ Min Capacity: 1 (dev), 2 (qa/stage)              │  │   │  │
-│  │  │  │  ├─ Max Capacity: 2 (dev), 4 (qa), 6 (stage)         │  │   │  │
-│  │  │  │  └─ Auto Scaling: CPU 70%, Memory 80%                │  │   │  │
-│  │  │  └──────────────────────────────────────────────────────┘  │   │  │
-│  │  │                                                              │   │  │
-│  │  │  SG: Allow from Internal ALB + VPC CIDR                     │   │  │
-│  │  └──────────────────────────────────────────────────────────────┘   │  │
-│  │  ┌──────────────────────────────────────────────────────────────┐   │  │
-│  │  │ PRIVATE SUBNET 2 (10.x.20.0/24)                              │   │  │
-│  │  │                                                              │   │  │
-│  │  │  ┌──────────────────────────────────────────────────────┐  │   │  │
-│  │  │  │  ECS BACKEND CLUSTER                                 │  │   │  │
-│  │  │  │  ├─ Service: backend-service                         │  │   │  │
-│  │  │  │  ├─ Task Definition: Backend API (Node.js)           │  │   │  │
-│  │  │  │  ├─ Container Port: 8080                             │  │   │  │
-│  │  │  │  ├─ Desired Count: 1-2 (dev), 2 (qa), 2 (stage)      │  │   │  │
-│  │  │  │  ├─ Min Capacity: 1 (dev), 2 (qa/stage)              │  │   │  │
-│  │  │  │  ├─ Max Capacity: 2 (dev), 4 (qa), 6 (stage)         │  │   │  │
-│  │  │  │  └─ Auto Scaling: CPU 70%, Memory 80%                │  │   │  │
-│  │  │  └──────────────────────────────────────────────────────┘  │   │  │
-│  │  │                                                              │   │  │
-│  │  │  SG: Allow from Internal ALB + VPC CIDR                     │   │  │
-│  │  │  Outbound: NAT via NAT Gateway                              │   │  │
-│  │  └──────────────────────────────────────────────────────────────┘   │  │
-│  │  ┌──────────────────────────────────────────────────────────────┐   │  │
-│  │  │ PRIVATE SUBNET 3 (10.x.30.0/24)                              │   │  │
-│  │  │                                                              │   │  │
-│  │  │  ┌──────────────────────────────────────────────────────┐  │   │  │
-│  │  │  │  AWS DOCUMENTDB CLUSTER                              │  │   │  │
-│  │  │  │  ├─ Engine: DocumentDB (MongoDB-compatible)          │  │   │  │
-│  │  │  │  ├─ Instance Class: db.t3.small (dev), medium (qa/s) │  │   │  │
-│  │  │  │  ├─ Instances: 1 (dev), 2 (qa), 3 (stage)            │  │   │  │
-│  │  │  │  ├─ Backup Retention: 7-30 days                      │  │   │  │
-│  │  │  │  ├─ Encryption: Enabled                              │  │   │  │
-│  │  │  │  ├─ Port: 27017                                      │  │   │  │
-│  │  │  │  └─ TLS: Enabled                                     │  │   │  │
-│  │  │  └──────────────────────────────────────────────────────┘  │   │  │
-│  │  │                                                              │   │  │
-│  │  │  SG: Allow port 27017 from ECS SG                           │   │  │
-│  │  └──────────────────────────────────────────────────────────────┘   │  │
-│  │                                                                      │  │
+│  │  └──────────────────────────────────────────────────────────────────┘ │  │
+│  │              │                                                         │  │
+│  │  ┌───────────┼─────────────────────────────────────────────────────┐  │  │
+│  │  │           ▼          PRIVATE SUBNETS                            │  │  │
+│  │  │  ┌──────────────────────────────────────────────────────────┐   │  │  │
+│  │  │  │        INTERNAL ALB (Private)                             │   │  │  │
+│  │  │  │  - Port 80  |  SG: Allow from External ALB SG             │   │  │  │
+│  │  │  └─────────────────────┬────────────────────────────────────┘   │  │  │
+│  │  │                        │                                         │  │  │
+│  │  │         ┌──────────────┴───────────────┐                        │  │  │
+│  │  │         ▼                              ▼                         │  │  │
+│  │  │  ┌──────────────────────┐   ┌──────────────────────┐            │  │  │
+│  │  │  │ APP CLUSTER          │   │ INGESTION CLUSTER     │            │  │  │
+│  │  │  │ (conde-nast-app-dev) │   │ (conde-nast-          │            │  │  │
+│  │  │  │                      │   │  ingestion-dev)        │            │  │  │
+│  │  │  │  ┌────────────────┐  │   │  ┌────────────────┐   │            │  │  │
+│  │  │  │  │ FE Service     │  │   │  │ Ingestion Svc  │   │            │  │  │
+│  │  │  │  │ Port: 3000     │  │   │  │ Port: 9001     │   │            │  │  │
+│  │  │  │  └────────────────┘  │   │  └───────┬────────┘   │            │  │  │
+│  │  │  │  ┌────────────────┐  │   │          │ SQS        │            │  │  │
+│  │  │  │  │ BE Service     │  │   │          ▼             │            │  │  │
+│  │  │  │  │ Port: 8080     │  │   │  ┌────────────────┐   │            │  │  │
+│  │  │  │  │ + Bedrock      │  │   │  │  SQS Queue     │   │            │  │  │
+│  │  │  │  │ + OpenSearch   │  │   │  │  landing-events│   │            │  │  │
+│  │  │  │  │ + S3 Access    │  │   │  └────────────────┘   │            │  │  │
+│  │  │  │  └────────────────┘  │   └──────────────────────┘            │  │  │
+│  │  │  └──────────────────────┘                                        │  │  │
+│  │  │                                                                   │  │  │
+│  │  │  ┌──────────────────────────────────────────────────────────┐   │  │  │
+│  │  │  │  AWS DocumentDB Cluster (Private Subnet 3)                │   │  │  │
+│  │  │  │  Port: 27017  |  URI stored in Secrets Manager            │   │  │  │
+│  │  │  └──────────────────────────────────────────────────────────┘   │  │  │
+│  │  └─────────────────────────────────────────────────────────────────┘  │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
-│  Security Groups:                                                         │
-│  ├─ ALB Public SG: 80, 443 from 0.0.0.0/0 → Any outbound                 │
-│  ├─ ALB Internal SG: 80 from ALB Public SG → Any outbound                 │
-│  ├─ ECS SG: 3000, 8080 from ALB Internal SG, VPC CIDR → Any outbound     │
-│  └─ DocumentDB SG: 27017 from ECS SG → Any outbound                       │
-│                                                                             │
-│  Routing:                                                                 │
-│  ├─ Public Route Table: 0.0.0.0/0 → IGW                                   │
-│  └─ Private Route Table: 0.0.0.0/0 → NAT Gateway                          │
+│  AWS Managed Services (outside VPC):                                        │
+│  ├─ ECR Repositories  (frontend, backend, ingestion container images)       │
+│  ├─ OpenSearch Serverless Collection                                         │
+│  ├─ Secrets Manager  (DocumentDB URI)                                       │
+│  ├─ S3 Buckets  (processed, image-search)                                   │
+│  └─ Amazon Bedrock  (inference profile: BE service only)                    │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
+---
+
+## ECS Cluster Design
+
+| Cluster | Services | Access |
+|---------|----------|--------|
+| `conde-nast-app-<env>` | Frontend (port 3000) + Backend (port 8080) | FE via External ALB, BE via Internal ALB |
+| `conde-nast-ingestion-<env>` | Ingestion (port 9001) | Internal only, no ALB |
+
+> The FE and BE services **share a single ECS cluster** to reduce cluster overhead. The cluster is created by the `ecs_frontend` module call (`create_cluster = true`) and joined by the `ecs_backend` call (`create_cluster = false`).
+
+---
+
 ## Traffic Flow
 
-### External User → Application
+### External User → Frontend
+1. **User** → HTTP/HTTPS → External ALB (public)
+2. **External ALB** → routes to FE ECS Service (port 3000)
+3. **FE container** → calls BE via `VITE_BE_BASE_URL` (Internal ALB DNS)
 
-1. **User** (Internet) 
-   → HTTP/HTTPS to External ALB DNS name
-   
-2. **External ALB** (Public, in Public Subnet)
-   → Routes to Internal ALB (private IP)
-   
-3. **Internal ALB** (Private, in Private Subnets)
-   → Routes to ECS Services (Frontend/Backend)
-   
-4. **ECS Services** (Private Subnets 1 & 2)
-   → Processes request
-   → Queries DocumentDB if needed (port 27017 allowed by SG)
-   
-5. **DocumentDB** (Private Subnet 3)
-   → Returns data to Backend
-   
-6. **Response** → Back through ALBs to User
+### External User → Backend (via FE)
+1. **FE** → Internal ALB (private)
+2. **Internal ALB** → BE ECS Service (port 8080)
+3. **BE container** → queries DocumentDB, OpenSearch, S3, Bedrock as needed
 
-### ECS → External Services
+### Ingestion Flow
+1. **SQS queue** (`landing-events`) receives messages from the `processed` S3 bucket trigger
+2. **Ingestion ECS** polls the queue and processes media files
+3. Results written to OpenSearch, DocumentDB, and S3
 
-- **Outbound Traffic**: Uses NAT Gateway in Public Subnet
-- **Outbound Route**: Private Route Table → NAT Gateway → IGW → Internet
+### ECS → External Services (Outbound)
+- All private subnet traffic that needs to reach the internet uses the **NAT Gateway**
+
+---
+
+## IAM Permission Model
+
+### Task Execution Role (ECS control plane)
+- `AmazonECSTaskExecutionRolePolicy` (AWS managed)
+- ECR image pull permissions (`ecr:GetAuthorizationToken`, `ecr:BatchGetImage`, etc.)
+- `secretsmanager:GetSecretValue` (to inject `DOCUMENTDB_URI` at container startup)
+
+### Task Role (Container application)
+Granted conditionally per service:
+
+| Policy | FE | BE | Ingestion |
+|--------|----|----|-----------|
+| Bedrock Invoke | ✗ | ✅ | ✅ |
+| S3 Access | ✗ | ✅ (processed + image-search) | ✅ (processed only) |
+| SQS Access | ✗ | ✗ | ✅ |
+| OpenSearch Access | ✗ | ✅ | ✅ |
+
+---
+
+## Task Definition Naming
+
+Task definitions are uniquely named per service and environment:
+
+```
+conde-nast-fe-task-definition-<env>
+conde-nast-be-task-definition-<env>
+conde-nast-ingestion-task-definition-<env>
+```
+
+---
+
+## Secrets Management
+
+| Secret | Name Pattern | Used By |
+|--------|-------------|---------|
+| DocumentDB URI | `conde-nast-documentdb-url-<env>` | BE, Ingestion |
+
+Secrets are injected at **container startup** via ECS `secrets` block referencing the Secrets Manager ARN — not passed as plain-text environment variables.
+
+---
+
+## S3 Bucket Access Matrix
+
+| Bucket | BE Access | Ingestion Access |
+|--------|-----------|-----------------|
+| `conde-nast-processed-<env>` | ✅ Read/Write | ✅ Read/Write |
+| `conde-nast-image-search-<env>` | ✅ Read/Write | ✗ |
+
+---
 
 ## Environment Differences
 
-| Component | Dev | QA | Stage |
-|-----------|-----|----|----|
-| **VPC CIDR** | 10.0.0.0/16 | 10.1.0.0/16 | 10.2.0.0/16 |
-| **Frontend Tasks** | 1 desired, 1-2 range | 2 desired, 2-4 range | 2 desired, 2-6 range |
-| **Backend Tasks** | 1 desired, 1-2 range | 2 desired, 2-4 range | 2 desired, 2-6 range |
-| **Frontend CPU** | 256 | 512 | 512 |
-| **Frontend Memory** | 512 MB | 1024 MB | 1024 MB |
-| **Backend CPU** | 256 | 512 | 512 |
-| **Backend Memory** | 512 MB | 1024 MB | 1024 MB |
-| **DocumentDB Instances** | 1 (t3.small) | 2 (t3.medium) | 3 (t3.medium) |
-| **DocumentDB Retention** | 7 days | 14 days | 30 days |
-| **HTTPS** | No | No | Yes |
+| Component | Dev | Stage |
+|-----------|-----|-------|
+| **VPC CIDR** | 10.0.0.0/16 | 10.2.0.0/16 |
+| **Frontend Tasks** | 1 desired, 1-2 range | 1 desired, 1-2 range |
+| **Backend Tasks** | 1 desired, 1-2 range | 1 desired, 1-2 range |
+| **Ingestion Tasks** | 1 desired, 1-2 range | 1 desired, 1-2 range |
+| **Task CPU** | 256 | 256 |
+| **Task Memory** | 512 MB | 512 MB |
+| **DocumentDB Instances** | 1 (t3.medium) | 1 (t3.medium) |
+| **DocumentDB Retention** | 7 days | 7 days |
+| **HTTPS** | No | No |
+| **Secret Recovery Window** | 7 days | 7 days |
+
+---
 
 ## Security Zones
 
 ### Zone 1: Internet
-- External clients
-- Can access: External ALB only
+- External clients can reach: **External ALB only**
 
 ### Zone 2: Public Subnet
-- Internet Gateway
-- NAT Gateway
-- Elastic IP
-- Can access: Internet and VPC
-- Cannot access: Private subnets directly
+- Internet Gateway, NAT Gateway, Elastic IP
+- External ALB hosted here
 
-### Zone 3: Private Subnets (1 & 2) - Application Layer
-- ECS Frontend Cluster (Subnet 1)
-- ECS Backend Cluster (Subnet 2)
-- Can access: Other private subnets, Internet via NAT Gateway
-- Cannot access: Internet directly, Public subnet directly
+### Zone 3: Private Subnets — Application Layer
+- App ECS Cluster (FE + BE services)
+- Ingestion ECS Cluster
+- Internal ALB
+- Outbound Internet via NAT Gateway
 
-### Zone 4: Private Subnet (3) - Data Layer
-- DocumentDB Cluster
-- Can access: Other private subnets
-- Cannot access: Internet, public subnet, external connections
+### Zone 4: Private Subnet — Data Layer
+- DocumentDB Cluster (port 27017)
+- Only reachable from ECS security groups
 
-## Data Flow Patterns
+### Zone 5: AWS-Managed (Global)
+- ECR, S3, OpenSearch Serverless, Secrets Manager, Bedrock
+- Accessed from ECS via VPC NAT Gateway / AWS PrivateLink
 
-### 1. Frontend Request
-User → External ALB → Internal ALB → Frontend ECS → Response → User
-
-### 2. Backend Request
-User → External ALB → Internal ALB → Backend ECS → Response → User
-
-### 3. Backend → DocumentDB
-Backend ECS → DocumentDB (Port 27017) → Data → Backend ECS
-
-### 4. Backend → External API
-Backend ECS → NAT Gateway → IGW → External API (uses ECS security group outbound rule)
+---
 
 ## High Availability
 
-- **Multi-AZ Deployment**: Resources distributed across 3 availability zones
-- **Auto Scaling**: Horizontal scaling based on CPU/Memory metrics
-- **Load Balancing**: External and Internal ALBs distribute traffic
-- **Database Replication**: DocumentDB replicas across instances
-- **CloudWatch Monitoring**: Container Insights enabled for all ECS resources
-- **VPC Flow Logs**: Network traffic monitoring
+- **Multi-AZ**: Resources distributed across 3 availability zones
+- **Auto Scaling**: Horizontal scaling on CPU (70%) and Memory (80%) metrics
+- **Load Balancing**: External and Internal ALBs distribute traffic across tasks
+- **Database Replication**: DocumentDB instances with replica set
+- **CloudWatch Logging**: All ECS services log to CloudWatch Log Groups
+
+---
+
+**Architecture Version**: 2.0
+**Last Updated**: February 2026
