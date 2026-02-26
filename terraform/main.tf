@@ -294,7 +294,7 @@ module "secrets_docdb" {
 
   environment             = var.environment
   project_name            = var.project_name
-  secret_name             = "${var.project_name}-documentdb-url-${var.environment}"
+  secret_name             = "${var.project_name}-documentdb-urls-${var.environment}"
   secret_description      = "DocumentDB connection URI"
   secret_string           = module.documentdb.documentdb_uri
   recovery_window_in_days = 7
