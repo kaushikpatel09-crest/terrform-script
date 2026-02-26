@@ -390,8 +390,3 @@ variable "search_collection" {
   default     = ""
 }
 
-variable "query_fetch_size" {
-  type        = number
-  description = "Number of documents to fetch from OpenSearch"
-  default     = 100
-}

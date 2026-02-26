@@ -61,6 +61,8 @@ resource "aws_ecs_task_definition" "main" {
     name      = var.container_name
     image     = "${var.container_image}:${var.container_image_tag}"
     essential = true
+    cpu       = var.task_cpu
+    memory    = var.task_memory
     portMappings = [{
       containerPort = var.container_port
       hostPort      = var.container_port

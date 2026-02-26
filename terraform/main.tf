@@ -158,6 +158,7 @@ module "ecs_backend" {
   depends_on = [module.vpc, module.internal_alb, module.ecs_frontend]
   environment_variables = {
     OPENSEARCH_ENDPOINT   = module.opensearch.collection_endpoint
+    SQS_QUEUE_URL         = module.sqs_landing.queue_url
     OPENSEARCH_REGION     = var.aws_region
     OPENSEARCH_SERVICE    = var.opensearch_service
     OPENSEARCH_INDEX_NAME = var.opensearch_index_name
@@ -168,7 +169,6 @@ module "ecs_backend" {
     ERRORS_COLLECTION     = var.errors_collection
     SEARCH_COLLECTION     = var.search_collection
     AWS_REGION            = var.aws_region
-    QUERY_FETCH_SIZE      = var.query_fetch_size
   }
 
   container_secrets = {
