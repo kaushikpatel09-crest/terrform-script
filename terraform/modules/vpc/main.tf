@@ -239,12 +239,12 @@ resource "aws_security_group" "ecs_ingestion" {
   description = "Security group for ECS Ingestion tasks"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  #  ingress {
+  #    from_port   = 80
+  #    to_port     = 80
+  #    protocol    = "tcp"
+  #    cidr_blocks = ["0.0.0.0/0"]
+  #  }
 
   egress {
     from_port   = 0
@@ -264,12 +264,12 @@ resource "aws_security_group" "ecs_thumbnail" {
   description = "Security group for ECS Thumbnail tasks"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  #  ingress {
+  #    from_port   = 80
+  #    to_port     = 80
+  #    protocol    = "tcp"
+  #    cidr_blocks = ["0.0.0.0/0"]
+  #  }
 
   egress {
     from_port   = 0
