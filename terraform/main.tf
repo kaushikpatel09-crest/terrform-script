@@ -186,6 +186,15 @@ module "sqs_landing" {
   s3_bucket_arn = module.s3_buckets.processed_bucket_arn
 }
 
+module "sqs_landing" {
+  source = "./modules/sqs"
+
+  environment   = var.environment
+  project_name  = var.project_name
+  queue_name    = "thumbnail-queue"
+  s3_bucket_arn = module.s3_buckets.processed_bucket_arn
+}
+
 # S3 Bucket Notification (Landing -> SQS)
 # resource "aws_s3_bucket_notification" "landing_to_sqs" {
 #   bucket = module.s3_buckets.landing_bucket_name
