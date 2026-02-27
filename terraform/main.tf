@@ -314,7 +314,6 @@ module "ecs_thumbnail" {
   depends_on = [module.vpc, module.s3_buckets, module.sqs_thumbnail, module.ecs_ingestion]
 
   environment_variables = {
-    SQS_QUEUE_URL           = module.sqs_thumbnail.queue_url
     PROCESSED_BUCKET        = module.s3_buckets.processed_bucket_name
     AWS_REGION              = var.aws_region
     DB_NAME                 = var.db_name
