@@ -62,6 +62,16 @@ module "ecr_ingestion" {
   scan_on_push    = true
 }
 
+# ECR Thumbnail Repository
+module "ecr_thumbnail" {
+  source = "./modules/ecr"
+
+  repository_name = "${var.project_name}-thumbnail-${var.environment}"
+  environment     = var.environment
+  project_name    = var.project_name
+  scan_on_push    = true
+}
+
 # VPC Module
 module "vpc" {
   source = "./modules/vpc"
@@ -254,6 +264,68 @@ module "ecs_ingestion" {
     AUDIO_INDEX_NAME         = var.audio_index_name
     TRANSCRIPTION_INDEX_NAME = var.transcription_index_name
     ENVIRONMENT              = var.inge-environment
+    THUMBNAIL_SQS_QUEUE_URL  = module.sqs_thumbnail.queue_url
+  }
+
+  container_secrets = {
+    DOCUMENTDB_URI = module.secrets_docdb.secret_arn
+  }
+}
+
+# ECS Thumbnail Service (reuses the ingestion cluster)
+module "ecs_thumbnail" {
+  source = "./modules/ecs"
+
+  environment    = var.environment
+  project_name   = var.project_name
+  cluster_name   = "${var.project_name}-ingestion-${var.environment}"
+  create_cluster = false
+  service_name   = "thumbnail"
+  container_name = "thumbnail"
+  container_port = var.thumbnail_container_port
+  task_cpu       = var.thumbnail_task_cpu
+  task_memory    = var.thumbnail_task_memory
+  desired_count  = var.thumbnail_desired_count
+  min_capacity   = var.thumbnail_min_capacity
+  max_capacity   = var.thumbnail_max_capacity
+
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.vpc.private_subnet_ids
+  security_group_ids = [module.vpc.ecs_thumbnail_security_group_id]
+
+  container_image     = module.ecr_thumbnail.repository_url
+  container_image_tag = var.thumbnail_image_tag
+  log_group_name      = "/ecs/${var.project_name}-thumbnail-${var.environment}"
+
+  # S3 bucket access for reading/writing thumbnails
+  enable_s3_access = true
+  s3_bucket_arns = [
+  module.s3_buckets.processed_bucket_arn]
+
+  ecr_repository_arn = module.ecr_thumbnail.repository_arn
+
+  # Thumbnail polls the thumbnail SQS queue
+  enable_sqs_access = true
+  sqs_queue_arn     = module.sqs_thumbnail.queue_arn
+
+  # No OpenSearch access needed for thumbnail generation
+  enable_ecs_opensearch_access = false
+
+  depends_on = [module.vpc, module.s3_buckets, module.sqs_thumbnail, module.ecs_ingestion]
+
+  environment_variables = {
+    SQS_QUEUE_URL           = module.sqs_thumbnail.queue_url
+    PROCESSED_BUCKET        = module.s3_buckets.processed_bucket_name
+    AWS_REGION              = var.aws_region
+    DB_NAME                 = var.db_name
+    JOBS_COLLECTION         = var.jobs_collection
+    ERRORS_COLLECTION       = var.errors_collection
+    THUMBNAIL_SQS_QUEUE_URL = module.sqs_thumbnail.queue_url
+    SQS_VISIBILITY_TIMEOUT  = var.thumbnail_sqs_visibility_timeout
+    SQS_WAIT_TIME_SECONDS   = var.thumbnail_sqs_wait_time_seconds
+    SQS_HEARTBEAT_INTERVAL  = var.thumbnail_sqs_heartbeat_interval
+    SQS_MAX_MESSAGES        = var.thumbnail_sqs_max_messages
+    ENVIRONMENT             = var.inge-environment
   }
 
   container_secrets = {

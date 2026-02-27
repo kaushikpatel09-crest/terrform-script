@@ -53,6 +53,11 @@ output "ecs_ingestion_security_group_id" {
   value       = aws_security_group.ecs_ingestion.id
 }
 
+output "ecs_thumbnail_security_group_id" {
+  description = "ECS Thumbnail security group ID"
+  value       = aws_security_group.ecs_thumbnail.id
+}
+
 output "documentdb_security_group_id" {
   description = "DocumentDB security group ID"
   value       = aws_security_group.documentdb.id

@@ -80,3 +80,16 @@ db_name           = "video_search"
 jobs_collection   = "video_ingestion_jobs"
 errors_collection = "video_pipeline_errors"
 search_collection = "video_search_logs"
+
+# ECS Thumbnail Service Configuration
+thumbnail_image_tag              = "latest"
+thumbnail_container_port         = 9002
+thumbnail_task_cpu               = 256
+thumbnail_task_memory            = 512
+thumbnail_desired_count          = 1
+thumbnail_min_capacity           = 1
+thumbnail_max_capacity           = 2
+thumbnail_sqs_visibility_timeout = 300
+thumbnail_sqs_wait_time_seconds  = 20
+thumbnail_sqs_max_messages       = 1
+thumbnail_sqs_heartbeat_interval = 120

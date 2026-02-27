@@ -258,6 +258,31 @@ resource "aws_security_group" "ecs_ingestion" {
   }
 }
 
+# Security Group for ECS Thumbnail
+resource "aws_security_group" "ecs_thumbnail" {
+  name        = "${var.project_name}-ecs-thumb-sg-${var.environment}"
+  description = "Security group for ECS Thumbnail tasks"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-ecs-thumb-sg-${var.environment}"
+  }
+}
+
 # Security Group for DocumentDB
 resource "aws_security_group" "documentdb" {
   name        = "${var.project_name}-documentdb-sg-${var.environment}"
@@ -294,6 +319,16 @@ resource "aws_security_group_rule" "docdb_ingress_ingestion" {
   security_group_id        = aws_security_group.documentdb.id
   source_security_group_id = aws_security_group.ecs_ingestion.id
   description              = "Allow DocumentDB access from Ingestion ECS service"
+}
+
+resource "aws_security_group_rule" "docdb_ingress_thumbnail" {
+  type                     = "ingress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.documentdb.id
+  source_security_group_id = aws_security_group.ecs_thumbnail.id
+  description              = "Allow DocumentDB access from Thumbnail ECS service"
 }
 
 resource "aws_security_group_rule" "docdb_ingress_vpc" {

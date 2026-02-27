@@ -395,3 +395,70 @@ variable "inge-environment" {
   description = "inge varible name"
   default     = ""
 }
+
+# Thumbnail Service Variables
+
+variable "thumbnail_image_tag" {
+  type        = string
+  description = "Container image tag for Thumbnail service"
+  default     = "latest"
+}
+
+variable "thumbnail_container_port" {
+  type        = number
+  description = "Container port for Thumbnail service"
+  default     = 9002
+}
+
+variable "thumbnail_task_cpu" {
+  type        = number
+  description = "Thumbnail task CPU (256, 512, 1024, 2048, 4096)"
+  default     = 512
+}
+
+variable "thumbnail_task_memory" {
+  type        = number
+  description = "Thumbnail task memory in MB"
+  default     = 1024
+}
+
+variable "thumbnail_desired_count" {
+  type        = number
+  description = "Desired number of Thumbnail tasks"
+  default     = 1
+}
+
+variable "thumbnail_min_capacity" {
+  type        = number
+  description = "Minimum Thumbnail capacity"
+  default     = 1
+}
+
+variable "thumbnail_max_capacity" {
+  type        = number
+  description = "Maximum Thumbnail capacity"
+  default     = 3
+}
+
+variable "thumbnail_sqs_visibility_timeout" {
+  type        = number
+  description = "Visibility timeout for Thumbnail SQS queue (seconds)"
+  default     = 300
+}
+
+variable "thumbnail_sqs_wait_time_seconds" {
+  type        = number
+  description = "Long-poll wait time for Thumbnail SQS queue (seconds)"
+  default     = 20
+}
+
+variable "thumbnail_sqs_max_messages" {
+  type        = number
+  description = "Maximum number of messages per Thumbnail SQS poll"
+  default     = 1
+}
+variable "thumbnail_sqs_heartbeat_interval" {
+  type        = number
+  description = "Heartbeat interval for Thumbnail SQS queue (seconds)"
+  default     = 120
+}
