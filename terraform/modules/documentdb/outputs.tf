@@ -33,6 +33,15 @@ output "master_username" {
 
 output "documentdb_uri" {
   description = "Connection URI for DocumentDB"
-  value       = "mongodb://${aws_docdb_cluster.main.master_username}:${var.master_password}@${aws_docdb_cluster.main.endpoint}:${aws_docdb_cluster.main.port}/?tls=false&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
-  sensitive   = true
+  # Notes on the connection string parameters:
+  # - directConnection=true: Connects directly to the DocumentDB cluster proxy endpoint
+  #   without triggering PyMongo's replica set topology discovery. Without this,
+  #   PyMongo sees 'replicaSet' mode, tries to resolve internal member hostnames from
+  #   the isMaster response, and fails with ReplicaSetNoPrimary / server_type Unknown.
+  # - replicaSet=rs0 is intentionally OMITTED for the same reason above.
+  # - retryWrites=false: Required for DocumentDB — retryable writes are not supported.
+  # - readPreference=secondaryPreferred: Allows reads from replicas to reduce load.
+  # - tls=false: TLS is disabled at the parameter group level (tls=disabled).
+  value     = "mongodb://${aws_docdb_cluster.main.master_username}:${var.master_password}@${aws_docdb_cluster.main.endpoint}:${aws_docdb_cluster.main.port}/?tls=false&directConnection=true&readPreference=secondaryPreferred&retryWrites=false"
+  sensitive = true
 }
