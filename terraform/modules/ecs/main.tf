@@ -57,6 +57,11 @@ resource "aws_ecs_task_definition" "main" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
+  # Preserve all previous revisions in AWS when Terraform replaces this resource.
+  # Without this, Terraform deregisters old revisions on every apply, destroying
+  # deployment history and making rollbacks impossible.
+  skip_destroy = true
+
   container_definitions = jsonencode([{
     name      = var.container_name
     image     = "${var.container_image}:${var.container_image_tag}"
