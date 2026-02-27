@@ -195,20 +195,6 @@ module "sqs_thumbnail" {
   s3_bucket_arn = module.s3_buckets.processed_bucket_arn
 }
 
-# S3 Bucket Notification (Landing -> SQS)
-# resource "aws_s3_bucket_notification" "landing_to_sqs" {
-#   bucket = module.s3_buckets.landing_bucket_name
-# 
-#   queue {
-#     queue_arn = module.sqs_landing.queue_arn
-#     events    = ["s3:ObjectCreated:*"]
-#     # filter_suffix = ".json" # Example filter, can be removed or adjusted
-#   }
-# 
-#   depends_on = [module.sqs_landing]
-# }
-
-# ECS Ingestion Backend Service
 module "ecs_ingestion" {
   source = "./modules/ecs"
 
@@ -267,6 +253,7 @@ module "ecs_ingestion" {
     VISUAL_INDEX_NAME        = var.visual_index_name
     AUDIO_INDEX_NAME         = var.audio_index_name
     TRANSCRIPTION_INDEX_NAME = var.transcription_index_name
+    ENVIRONMENT              = var.inge-environment
   }
 
   container_secrets = {

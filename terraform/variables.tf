@@ -390,3 +390,8 @@ variable "search_collection" {
   default     = ""
 }
 
+variable "inge-environment" {
+  type        = string
+  description = "inge varible name"
+  default     = ""
+}
