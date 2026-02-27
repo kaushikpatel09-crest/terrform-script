@@ -186,7 +186,7 @@ module "sqs_landing" {
   s3_bucket_arn = module.s3_buckets.processed_bucket_arn
 }
 
-module "sqs_landing" {
+module "sqs_thumbnail" {
   source = "./modules/sqs"
 
   environment   = var.environment
