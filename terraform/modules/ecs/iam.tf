@@ -186,6 +186,29 @@ resource "aws_iam_role_policy" "ecs_sqs_access" {
   })
 }
 
+# SQS send (producer) policy — grants the task role permission to enqueue messages to other queues
+resource "aws_iam_role_policy" "ecs_sqs_send_access" {
+  count = length(var.sqs_send_queue_arns) > 0 ? 1 : 0
+
+  name = "${var.project_name}-ecs-sqs-send-${var.service_name}-${var.environment}"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "SQSSendMessage"
+        Effect = "Allow",
+        Action = [
+          "sqs:SendMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        Resource = var.sqs_send_queue_arns
+      }
+    ]
+  })
+}
+
 # OpenSearch Serverless access policy — grants the task role permission to query the collection
 resource "aws_iam_role_policy" "ecs_opensearch_access" {
   # count must only use values known at plan time (static vars/locals).

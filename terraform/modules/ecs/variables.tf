@@ -127,6 +127,12 @@ variable "enable_sqs_access" {
   default     = false
 }
 
+variable "sqs_send_queue_arns" {
+  type        = list(string)
+  description = "(Optional) List of SQS queue ARNs that this service is allowed to send (produce) messages to. Grants sqs:SendMessage only."
+  default     = []
+}
+
 variable "environment_variables" {
   type        = map(string)
   description = "(Optional) Map of environment variables to set in the container. Example: { BE_BASE_URL = 'https://api.example.com' }"

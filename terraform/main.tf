@@ -235,10 +235,11 @@ module "ecs_ingestion" {
   ecr_repository_arn           = module.ecr_ingestion.repository_arn
   sqs_queue_arn                = module.sqs_landing.queue_arn
   enable_sqs_access            = true
+  sqs_send_queue_arns          = [module.sqs_thumbnail.queue_arn]
   enable_ecs_opensearch_access = true
   opensearch_collection_arn    = module.opensearch.collection_arn
 
-  depends_on = [module.vpc, module.s3_buckets, module.sqs_landing]
+  depends_on = [module.vpc, module.s3_buckets, module.sqs_landing, module.sqs_thumbnail]
 
   environment_variables = {
     OPENSEARCH_ENDPOINT      = module.opensearch.collection_endpoint
