@@ -179,7 +179,6 @@ module "ecs_backend" {
     ERRORS_COLLECTION     = var.errors_collection
     SEARCH_COLLECTION     = var.search_collection
     AWS_REGION            = var.aws_region
-    DEMO                  = "Test1234"
   }
 
   container_secrets = {
@@ -327,6 +326,7 @@ module "ecs_thumbnail" {
     SQS_HEARTBEAT_INTERVAL  = var.thumbnail_sqs_heartbeat_interval
     SQS_MAX_MESSAGES        = var.thumbnail_sqs_max_messages
     ENVIRONMENT             = var.inge-environment
+    THUMBNAIL_CONCURRENCY   = var.thumbnail_concurrency
   }
 
   container_secrets = {

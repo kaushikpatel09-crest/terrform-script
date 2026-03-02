@@ -462,3 +462,8 @@ variable "thumbnail_sqs_heartbeat_interval" {
   description = "Heartbeat interval for Thumbnail SQS queue (seconds)"
   default     = 120
 }
+variable "thumbnail_concurrency" {
+  type        = number
+  description = "Number of concurrent thumbnail tasks"
+  default     = 1
+}

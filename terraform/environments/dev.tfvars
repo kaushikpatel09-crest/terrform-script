@@ -93,3 +93,4 @@ thumbnail_sqs_visibility_timeout = 300
 thumbnail_sqs_wait_time_seconds  = 20
 thumbnail_sqs_max_messages       = 1
 thumbnail_sqs_heartbeat_interval = 120
+thumbnail_concurrency            = 1
