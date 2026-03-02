@@ -179,6 +179,7 @@ module "ecs_backend" {
     ERRORS_COLLECTION     = var.errors_collection
     SEARCH_COLLECTION     = var.search_collection
     AWS_REGION            = var.aws_region
+    DEMO                  = "Test1234"
   }
 
   container_secrets = {
