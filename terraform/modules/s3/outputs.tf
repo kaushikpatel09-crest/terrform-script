@@ -25,3 +25,13 @@ output "image_search_bucket_name" {
 #    aws_s3_bucket.image_search.arn
 #  ]
 #}
+# Pre-existing video outputs bucket
+output "video_outputs_bucket_arn" {
+  description = "ARN of the pre-existing cne-production-video_outputs bucket"
+  value       = data.aws_s3_bucket.video_outputs.arn
+}
+
+output "video_outputs_bucket_name" {
+  description = "Name of the pre-existing cne-production-video_outputs bucket"
+  value       = data.aws_s3_bucket.video_outputs.id
+}

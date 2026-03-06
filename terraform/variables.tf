@@ -467,3 +467,10 @@ variable "thumbnail_concurrency" {
   description = "Number of concurrent thumbnail tasks"
   default     = 1
 }
+
+
+variable "metadata_index_name" {
+  type        = string
+  description = "Metadata index name"
+  default     = ""
+}

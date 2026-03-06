@@ -7,6 +7,14 @@ terraform {
   }
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Pre-existing bucket — created manually in AWS, NOT managed by Terraform.
+# We only look it up here so its ARN/name can be passed to IAM policies
+# and environment variables. Terraform will never modify or destroy it.
+# ─────────────────────────────────────────────────────────────────────────────
+data "aws_s3_bucket" "video_outputs" {
+  bucket = "cne-production-video-outputs-demo"
+}
 
 # S3 Bucket - Processed Zone
 resource "aws_s3_bucket" "processed" {

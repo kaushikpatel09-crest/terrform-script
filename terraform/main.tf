@@ -230,7 +230,7 @@ module "ecs_ingestion" {
 
   # S3 bucket access
   enable_s3_access             = true
-  s3_bucket_arns               = [module.s3_buckets.processed_bucket_arn]
+  s3_bucket_arns               = [module.s3_buckets.processed_bucket_arn, module.s3_buckets.video_outputs_bucket_arn] # pre-existing cne-production-video_outputs
   bedrock_model_arn            = local.bedrock_model_arn
   ecr_repository_arn           = module.ecr_ingestion.repository_arn
   sqs_queue_arn                = module.sqs_landing.queue_arn
@@ -256,6 +256,8 @@ module "ecs_ingestion" {
     MAX_WAIT_TIME_SECONDS    = var.ingestion_max_wait_time_seconds
     POLL_INTERVAL_SECONDS    = var.ingestion_poll_interval_seconds
     PROCESSED_BUCKET         = module.s3_buckets.processed_bucket_name
+    VIDEO_OUTPUTS_BUCKET     = module.s3_buckets.video_outputs_bucket_name # pre-existing bucket
+    METADATA_INDEX_NAME      = var.metadata_index_name
     AWS_BUCKET_OWNER         = data.aws_caller_identity.current.account_id
     DB_NAME                  = var.db_name
     JOBS_COLLECTION          = var.jobs_collection
