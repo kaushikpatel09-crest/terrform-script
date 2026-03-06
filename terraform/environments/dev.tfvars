@@ -41,7 +41,7 @@ ingestion_task_memory   = 512
 ingestion_desired_count = 1
 ingestion_min_capacity  = 1
 ingestion_max_capacity  = 2
-  metadata_index_name     = "conde-nast-video-metadata-index-dev"
+metadata_index_name     = "conde-nast-video-metadata-index-dev"
 # Load Balancer Configuration
 enable_https    = false
 certificate_arn = ""
