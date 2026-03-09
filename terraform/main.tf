@@ -124,9 +124,9 @@ module "ecs_frontend" {
   depends_on = [module.vpc, module.external_alb]
 }
 
-  # ECS Backend Module
-  module "ecs_backend" {
-    source = "./modules/ecs"
+# ECS Backend Module
+module "ecs_backend" {
+  source = "./modules/ecs"
 
   environment    = var.environment
   project_name   = var.project_name
@@ -151,17 +151,17 @@ module "ecs_frontend" {
   bedrock_model_arn   = local.bedrock_model_arn
 
 
-    # S3 bucket access
-    enable_s3_access = true
-    s3_bucket_arns = [
-      module.s3_buckets.processed_bucket_arn,
-      module.s3_buckets.image_search_bucket_arn
-    ]
+  # S3 bucket access
+  enable_s3_access = true
+  s3_bucket_arns = [
+    module.s3_buckets.processed_bucket_arn,
+    module.s3_buckets.image_search_bucket_arn
+  ]
 
-    # Allow backend service to send messages to the landing-events queue
-    sqs_send_queue_arns = [
-      module.sqs_landing.queue_arn
-    ]
+  # Allow backend service to send messages to the landing-events queue
+  sqs_send_queue_arns = [
+    module.sqs_landing.queue_arn
+  ]
 
   #ecr_repository_arn = var.backend_ecr_repository_arn
   ecr_repository_arn           = module.ecr_backend.repository_arn
