@@ -54,7 +54,7 @@ resource "aws_docdb_cluster_parameter_group" "main" {
 
   parameter {
     name  = "tls"
-    value = "enable"
+    value = "enabled"
   }
 
   tags = {
