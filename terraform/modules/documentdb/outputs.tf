@@ -42,6 +42,6 @@ output "documentdb_uri" {
   # - retryWrites=false: Required for DocumentDB — retryable writes are not supported.
   # - readPreference=secondaryPreferred: Allows reads from replicas to reduce load.
   # - tls=false: TLS is disabled at the parameter group level (tls=disabled).
-  value     = "mongodb://${aws_docdb_cluster.main.master_username}:${var.master_password}@${aws_docdb_cluster.main.endpoint}:${aws_docdb_cluster.main.port}/?tls=false&directConnection=true&readPreference=secondaryPreferred&retryWrites=false"
+  value     = "mongodb://${aws_docdb_cluster.main.master_username}:${var.master_password}@${aws_docdb_cluster.main.endpoint}:${aws_docdb_cluster.main.port}/?tls=true&directConnection=true&readPreference=secondaryPreferred&retryWrites=false"
   sensitive = true
 }
